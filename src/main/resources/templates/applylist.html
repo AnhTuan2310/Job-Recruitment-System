@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh Sách Đơn Ứng Tuyển</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("⛔ Bạn chưa đăng nhập!");
+      window.location.href = "/login";
+    }
+  </script>
+
+  <body class="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-4xl">
+      <div class="mb-4 flex justify-between">
+        <button
+          type="button"
+          onclick="location.href='trangchu'"
+          class="bg-blue-500 text-white p-1 rounded text-xs"
+        >
+          Trang chủ
+        </button>
+        <div class="flex items-center">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Tìm kiếm (ID, Mô tả, Trạng thái)..."
+            class="p-2 border rounded-l text-sm"
+            onkeyup="searchApplications()"
+          />
+          <button
+            onclick="searchApplications()"
+            class="bg-blue-500 text-white p-2 rounded-r text-xs"
+          >
+            Tìm
+          </button>
+        </div>
+      </div>
+      <h1 class="text-2xl font-bold mb-4 text-center text-blue-600">
+        Danh Sách Đơn Ứng Tuyển
+      </h1>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-blue-100">
+            <th class="p-2 border text-gray-700">ID</th>
+            <th class="p-2 border text-gray-700">Mô Tả</th>
+            <th class="p-2 border text-gray-700">Trạng Thái</th>
+            <th class="p-2 border text-gray-700">Tạo Bởi</th>
+            <th class="p-2 border text-gray-700">Job Title</th>
+            <th class="p-2 border text-gray-700">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody id="apply-list-body"></tbody>
+      </table>
+
+      <!-- Modal chỉnh sửa -->
+      <div
+        id="editModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden"
+      >
+        <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+          <h2 class="text-xl font-bold mb-4">Chỉnh Sửa Đơn Ứng Tuyển</h2>
+          <input id="editId" type="hidden" />
+          <div class="mb-4">
+            <label class="block text-gray-700">Mô Tả</label>
+            <textarea
+              id="editCoverLetter"
+              class="w-full p-2 border rounded"
+            ></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Trạng Thái</label>
+            <select id="editStatus" class="w-full p-2 border rounded">
+              <option value="ACCEPTED">ACCEPTED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="REJECTED">REJECTED</option>
+            </select>
+          </div>
+          <button
+            onclick="saveEdit()"
+            class="bg-blue-500 text-white p-2 rounded mr-2"
+          >
+            Lưu
+          </button>
+          <button
+            onclick="closeModal()"
+            class="bg-gray-500 text-white p-2 rounded"
+          >
+            Hủy
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      let allApplications = []; // Lưu toàn bộ danh sách để lọc
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const tbody = document.getElementById("apply-list-body");
+        const token = localStorage.getItem("token");
+
+        try {
+          await loadApplications(tbody, token);
+        } catch (error) {
+          console.error("Lỗi:", error);
+          tbody.innerHTML = `<tr><td colspan="9" class="text-center text-red-500">❌ ${error.message}</td></tr>`;
+        }
+      });
+
+      // Hàm tải danh sách ứng dụng
+      async function loadApplications(tbody, token) {
+        const response = await fetch("/api/applications", {
+          headers: {
+            Authorization: "Bearer " + token,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách đơn apply.");
+        }
+        allApplications = await response.json(); // Lưu toàn bộ danh sách
+        displayApplications(allApplications, tbody);
+      }
+
+      // Hàm hiển thị danh sách ứng dụng
+      function displayApplications(applys, tbody) {
+        tbody.innerHTML = "";
+        if (applys.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="9" class="text-center text-red-500">❌ Không tìm thấy kết quả.</td></tr>`;
+          return;
+        }
+        applys.forEach((app, index) => {
+          const row = document.createElement("tr");
+          row.className = "hover:bg-blue-50";
+
+          const statusColor =
+            app.status === "ACCEPTED"
+              ? "text-green-600"
+              : app.status === "PENDING"
+              ? "text-yellow-600"
+              : "text-red-600";
+
+          row.innerHTML = `
+      <td class="p-2 border">${app.id}</td>
+      <td class="p-2 border">${app.coverLetter}</td>
+      <td class="p-2 border ${statusColor}">${app.status}</td>
+      <td class="p-2 border">${
+        app.applicant.full_name || app.applicant.username
+      }</td>
+      <td class="p-2 border">${app.job.title}</td>
+      <td class="p-2 border text-center">
+        <button onclick="editApplication(${app.id}, '${app.coverLetter}', '${
+            app.status
+          }')" 
+          class="bg-yellow-500 text-white p-1 rounded text-xs mr-1">Sửa</button>
+        <button onclick="deleteApplication(this, ${app.id})" 
+          class="bg-red-500 text-white p-1 rounded text-xs">Xóa</button>
+      </td>
+  `;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Hàm tìm kiếm
+      function searchApplications() {
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.trim()
+          .toLowerCase();
+        const tbody = document.getElementById("apply-list-body");
+        if (!searchTerm) {
+          displayApplications(allApplications, tbody); // Hiển thị toàn bộ nếu không có từ khóa
+          return;
+        }
+
+        const filteredApplications = allApplications.filter(
+          (app) =>
+            app.id.toString().includes(searchTerm) ||
+            app.coverLetter.toLowerCase().includes(searchTerm) ||
+            app.status.toLowerCase().includes(searchTerm)
+        );
+        displayApplications(filteredApplications, tbody);
+      }
+
+      // Hàm mở modal chỉnh sửa
+      function editApplication(id, coverLetter, status) {
+        const role = localStorage.getItem("role");
+        if (role !== "ROLE_ADMIN") {
+          alert("⛔ Bạn không có quyền sửa đơn Apply!");
+          return;
+        }
+        document.getElementById("editId").value = id;
+        document.getElementById("editCoverLetter").value = coverLetter;
+        document.getElementById("editStatus").value = status;
+        document.getElementById("editModal").classList.remove("hidden");
+      }
+
+      // Hàm đóng modal
+      function closeModal() {
+        document.getElementById("editModal").classList.add("hidden");
+      }
+
+      // Hàm lưu chỉnh sửa
+      async function saveEdit() {
+        const role = localStorage.getItem("role");
+        if (role === "ROLE_ADMIN") {
+          const id = document.getElementById("editId").value;
+          const coverLetter = document.getElementById("editCoverLetter").value;
+          const status = document.getElementById("editStatus").value;
+          const token = localStorage.getItem("token");
+
+          try {
+            const response = await fetch(`/api/applications/${id}`, {
+              method: "PUT",
+              headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ coverLetter, status }),
+            });
+            if (!response.ok) {
+              throw new Error("Không thể cập nhật đơn ứng tuyển.");
+            }
+            alert("Đơn ứng tuyển đã được cập nhật thành công!");
+            closeModal();
+            location.reload();
+          } catch (error) {
+            console.error("Lỗi:", error);
+            alert("❌ " + error.message);
+          }
+        } else {
+          alert("Bạn không có quyền lưu thông tin này !");
+          return;
+        }
+      }
+      function getUserIdFromToken() {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.id || payload.userId || null;
+      }
+      // Hàm xóa
+      async function deleteApplication(button, id) {
+        const row = button.closest("tr"); // Lấy dòng chứa nút
+        const createdBy = row.cells[3].textContent.trim(); // Lấy cột "Tạo Bởi" (index 3)
+        const currentUserId = getUserIdFromToken()?.toString();
+        const role = localStorage.getItem("role"); // Lấy ID từ token và convert về string để so sánh
+
+        if (role !== "ROLE_ADMIN" && createdBy !== currentUserId) {
+          alert("⛔ Bạn không thể xóa Đơn Apply của người khác!");
+          return;
+        }
+
+        if (confirm("Bạn có chắc muốn xóa đơn ứng tuyển này?")) {
+          const token = localStorage.getItem("token");
+          try {
+            const response = await fetch(`/api/applications/${id}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+            });
+
+            if (!response.ok) {
+              throw new Error("Không thể xóa đơn ứng tuyển.");
+            }
+
+            alert("✅ Đơn ứng tuyển đã được xóa thành công!");
+            location.reload();
+          } catch (error) {
+            console.error("Lỗi:", error);
+            alert("❌ " + error.message);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

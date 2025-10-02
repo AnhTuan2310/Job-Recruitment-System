@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa Thông Tin Cá Nhân</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #0288d1;
+        }
+        .form-container {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #b0bec5;
+            border-radius: 5px;
+            color: #455a64; /* Chữ sáng nhạt */
+        }
+        .btn-save {
+            background: linear-gradient(90deg, #42a5f5, #1976d2);
+            color: white;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+        .btn- {
+            background: linear-gradient(90deg, #42a5f5, #1976d2);
+            color: white;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+        .btn-save:hover {
+            transform: scale(1.05);
+        }
+        .user-type-selector {
+            margin-bottom: 20px;
+        }
+        .password-field {
+            position: relative;
+        }
+        .password-field input {
+            padding-right: 40px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sửa Thông Tin Cá Nhân</h1>
+
+    <div id="companyView" class="form-container">
+        <h2>Thông Tin Cá Nhân</h2>
+        <div>
+            <label for="fullname">Full Name:</label>
+            <input type="text" id="fullname" placeholder="">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="">
+            <label for="username">UserName:</label>
+            <input type="text" id="username" placeholder="">
+            <div class="password-field">
+                <label for="oldPassword">🔒 Mật khẩu hiện tại:</label>
+                <input type="password" id="oldPassword" placeholder="Nhập mật khẩu cũ">
+
+                <label for="newPassword">🆕 Mật khẩu mới:</label>
+                <input type="password" id="newPassword" placeholder="Mật khẩu mới">
+
+                <label for="confirmPassword">✅ Xác nhận mật khẩu mới:</label>
+                <input type="password" id="confirmPassword" placeholder="Xác nhận mật khẩu mới">
+            </div>
+            <div style="display: flex; align-items: center;">
+                <input style="margin-right: 1px; width: 10px;" type="checkbox" id="togglePassword">
+                <label style="cursor: pointer;" for="togglePassword">Hiển thị mật khẩu</label>
+            </div>
+            <button class="btn-save">Lưu</button>
+            <button class ="btn-" onclick="location.href='/trangchu'">Trang chủ</button>
+        </div>
+    </div>
+</div>
+<!-- Đặt bên trong <body> -->
+<script>
+    document.getElementById("togglePassword").addEventListener("change", function () {
+        const show = this.checked;
+        ["oldPassword", "newPassword", "confirmPassword"].forEach(id => {
+            const input = document.getElementById(id);
+            input.type = show ? "text" : "password";
+        });
+    });
+    document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("⚠️ Phiên đăng nhập hết hạn.");
+            window.location.href = "/login";
+            return;
+        }
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userId = payload.id;
+        const username = payload.sub || payload.username;
+        const role = (payload.roles?.[0] || "").replace("ROLE_", "");
+        console.log("🧾 ROLE:", role);
+
+        document.getElementById("username").value = username;
+        document.getElementById("username").readOnly = true;
+
+        // Gọi API lấy thông tin user
+        try {
+            const res = await fetch(`/api/users/me`, {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+            if (!res.ok) throw new Error("Không thể tải thông tin người dùng");
+
+            const user = await res.json();
+            document.getElementById("fullname").value = user.full_name;
+            document.getElementById("email").value = user.email;
+        } catch (err) {
+            alert("❌ Lỗi tải thông tin: " + err.message);
+        }
+
+        // Sự kiện lưu thông tin
+        document.querySelector(".btn-save").addEventListener("click", async () => {
+            const fullName = document.getElementById("fullname").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const passwordOld = document.getElementById("oldPassword").value;
+            const passwordNew = document.getElementById("newPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            // Nếu có mật khẩu thì kiểm tra hợp lệ
+            let finalPassword = null;
+            if (passwordNew || confirmPassword) {
+                if (passwordNew !== confirmPassword) {
+                    alert("❌ Mật khẩu mới và xác nhận không khớp!");
+                    return;
+                }
+
+                // Gọi API xác thực mật khẩu cũ (nếu bạn có API kiểm tra)
+                try {
+                    const check = await fetch("/api/auth/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username, password: passwordOld })
+                    });
+                    if (!check.ok) {
+                        alert("❌ Mật khẩu hiện tại không đúng!");
+                        return;
+                    }
+                } catch (err) {
+                    alert("❌ Không thể xác thực mật khẩu hiện tại.");
+                    return;
+                }
+
+                finalPassword = passwordNew;
+            }
+
+            const updateData = {
+                email: email,
+                full_name: fullName,
+                password: finalPassword, // null nếu không đổi
+                role: role,
+                username: username
+            };
+
+            try {
+                const res = await fetch(`/api/users/${userId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error(msg);
+                }
+
+                alert("✅ Cập nhật thành công! Vui lòng đăng nhập lại.");
+                localStorage.clear();
+                window.location.href = "/login";
+            } catch (err) {
+                alert("❌ Cập nhật thất bại: " + err.message);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
