@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TopCV - CV Scoring</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+        :root {
+            --dark-green: #0a2a1a;
+            --bright-green: #28a745;
+            --light-green: #34d399;
+            --white: #ffffff;
+            --gray: #e0e0e0;
+            --red: #dc3545;
+            --orange: #fd7e14;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: var(--dark-green);
+            color: var(--white);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        .navbar .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .logo i {
+            color: var(--bright-green);
+            margin-left: 5px;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .navbar .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--bright-green);
+        }
+
+        .navbar .actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar .actions .lang-selector {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--white);
+        }
+
+        .navbar .actions .lang-selector i {
+            margin-left: 5px;
+        }
+
+        .navbar .actions .consultation {
+            color: var(--bright-green);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .navbar .actions .consultation i {
+            margin-right: 5px;
+        }
+
+        .navbar .actions .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .navbar .actions .btn.login {
+            border: 1.5px solid var(--bright-green);
+            color: var(--white);
+            background-color: transparent;
+        }
+
+        .navbar .actions .btn.login:hover {
+            background-color: rgba(40, 167, 69, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .navbar .actions .btn.post-job {
+            background-color: var(--bright-green);
+            color: var(--white);
+            border: none;
+        }
+
+        .navbar .actions .btn.post-job:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 100px 50px 50px;
+            background: radial-gradient(circle at center, rgba(10, 42, 26, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-section h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-section h1 .highlight {
+            color: var(--bright-green);
+        }
+
+        .hero-section p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .hero-section .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .hero-section .cta-buttons .btn {
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hero-section .cta-buttons .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-section .cta-buttons .btn.consult {
+            background-color: #1a472a;
+            color: var(--white);
+        }
+
+        .hero-section .cta-buttons .btn.consult:hover {
+            background-color: #215a35;
+        }
+
+        .hero-section .cta-buttons .btn.experience {
+            background-color: var(--bright-green);
+            color: var(--white);
+        }
+
+        .hero-section .cta-buttons .btn.experience:hover {
+            background-color: #218838;
+        }
+
+        .illustration-section {
+            position: relative;
+            padding: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            min-height: 400px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(10, 42, 26, 0.5) 100%);
+        }
+
+        .robot-character {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(52, 211, 153, 0.5);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .robot-character::before {
+            content: "🤖";
+            font-size: 4rem;
+            filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.8));
+        }
+
+        .robot-character::after {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: var(--bright-green);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--bright-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .ui-card {
+            background-color: rgba(52, 211, 153, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 15px;
+            padding: 20px 30px;
+            position: absolute;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .ui-card.match-score {
+            right: 10%;
+            bottom: 100px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ui-card.match-score .icon {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+        }
+
+        .ui-card.match-score .icon i {
+            font-size: 1.8rem;
+            color: var(--light-green);
+        }
+
+        .ui-card.match-score .text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .ui-card.percentages {
+            right: 5%;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px 25px;
+        }
+
+        .ui-card.percentages .percentage-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ui-card.percentages .percentage-item .bar {
+            width: 80px;
+            height: 8px;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ui-card.percentages .percentage-item .bar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .ui-card.percentages .percentage-item.green .bar::before {
+            width: 80%;
+            background-color: var(--bright-green);
+        }
+        .ui-card.percentages .percentage-item.red .bar::before {
+            width: 40%;
+            background-color: var(--red);
+        }
+        .ui-card.percentages .percentage-item.orange .bar::before {
+            width: 60%;
+            background-color: var(--orange);
+        }
+        .ui-card.percentages .percentage-item.full-green .bar::before {
+            width: 100%;
+            background-color: var(--bright-green);
+        }
+
+        .ui-card.percentages .percentage-item .value {
+            font-size: 1rem;
+            font-weight: 500;
+            min-width: 40px;
+        }
+        .ui-card.percentages .percentage-item.green .value {
+            color: var(--bright-green);
+        }
+        .ui-card.percentages .percentage-item.red .value {
+            color: var(--red);
+        }
+        .ui-card.percentages .percentage-item.orange .value {
+            color: var(--orange);
+        }
+        .ui-card.percentages .percentage-item.full-green .value {
+            color: var(--bright-green);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .navbar .nav-links {
+                display: none;
+            }
+            .navbar .actions {
+                gap: 10px;
+            }
+            .navbar .actions .consultation {
+                display: none;
+            }
+            .navbar .actions .btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+            .hero-section {
+                padding: 80px 20px 30px;
+            }
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+            .hero-section p {
+                font-size: 1rem;
+            }
+            .hero-section .cta-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .robot-character {
+                width: 150px;
+                height: 150px;
+                bottom: 20px;
+            }
+            .robot-character::before {
+                font-size: 2.5rem;
+            }
+            .ui-card.match-score {
+                right: 5%;
+                bottom: 150px;
+                padding: 15px 20px;
+            }
+            .ui-card.match-score .text {
+                font-size: 1.2rem;
+            }
+            .ui-card.percentages {
+                right: 2%;
+                bottom: 50px;
+                padding: 10px 15px;
+            }
+            .ui-card.percentages .percentage-item .bar {
+                width: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 10px 15px;
+            }
+            .navbar .logo {
+                font-size: 1.5rem;
+            }
+            .navbar .actions .btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            .hero-section .cta-buttons .btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Jobs Section Styles */
+        .jobs-section {
+            padding: 80px 50px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(10, 42, 26, 0.9) 100%);
+            min-height: 500px;
+        }
+
+        .jobs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .jobs-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .jobs-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--bright-green);
+            border-radius: 2px;
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .job-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .job-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--bright-green), var(--light-green));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(52, 211, 153, 0.2);
+            border-color: var(--bright-green);
+        }
+
+        .job-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .job-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .job-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .job-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .job-info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .job-info-item i {
+            color: var(--bright-green);
+            width: 20px;
+        }
+
+        .job-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .job-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .job-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--bright-green);
+            border: 1px solid var(--bright-green);
+        }
+
+        .apply-btn {
+            padding: 10px 25px;
+            background: var(--bright-green);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .apply-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--white);
+            font-size: 1.2rem;
+            padding: 50px;
+            grid-column: 1 / -1;
+        }
+
+        .no-jobs {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            padding: 50px;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .jobs-section {
+                padding: 60px 20px;
+            }
+            
+            .jobs-title {
+                font-size: 2rem;
+            }
+            
+            .jobs-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="logo">topcv<i class="fas fa-check-circle"></i></a>
+        <div class="nav-links">
+            <a href="#">Giới thiệu</a>
+            <a href="#">Dịch vụ</a>
+            <a href="#">Báo giá</a>
+            <a href="#">Hỗ trợ</a>
+            <a href="#">Blog tuyển dụng</a>
+        </div>
+        <div class="actions">
+            <div class="lang-selector">
+                <i class="fas fa-star" style="color: red"></i>
+                <i class="fas fa-caret-down"></i>
+            </div>
+            <a href="#" class="consultation">
+                <i class="fas fa-phone-alt"></i> Tư vấn tuyển dụng
+            </a>
+            <button class="btn login" onclick="window.location.href='/login'">
+                Đăng nhập
+            </button>
+            <a href="#" class="btn post-job">Đăng tin ngay</a>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <h1>CV Scoring - <span class="highlight">Chấm điểm CV</span></h1>
+        <p>Chấm điểm và sàng lọc ứng viên hiệu quả</p>
+        <div class="cta-buttons">
+            <a href="#" class="btn consult">Tư vấn tuyển dụng</a>
+            <a href="#" class="btn experience">Trải nghiệm ngay</a>
+        </div>
+    </div>
+
+    <!-- Jobs Section -->
+    <div class="jobs-section">
+        <div class="jobs-container">
+            <h2 class="jobs-title">Công việc đang tuyển dụng</h2>
+            <div id="jobs-list" class="jobs-grid">
+                <!-- Jobs will be loaded here dynamically -->
+                <div class="loading">Đang tải công việc...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="illustration-section">
+        <div class="robot-character"></div>
+        <div class="ui-card match-score">
+            <div class="icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="text">80% PHÙ HỢP</div>
+        </div>
+        <div class="ui-card percentages">
+            <div class="percentage-item green">
+                <div class="bar"></div>
+                <div class="value">80%</div>
+            </div>
+            <div class="percentage-item red">
+                <div class="bar"></div>
+                <div class="value">40%</div>
+            </div>
+            <div class="percentage-item orange">
+                <div class="bar"></div>
+                <div class="value">60%</div>
+            </div>
+            <div class="percentage-item full-green">
+                <div class="bar"></div>
+                <div class="value">100%</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        function isUserLoggedIn() {
+            const token = localStorage.getItem('token');
+            return token !== null && token !== undefined && token !== '';
+        }
+
+        // Format salary
+        function formatSalary(salary) {
+            if (!salary) return 'Thỏa thuận';
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(salary);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Load jobs from API
+        async function loadJobs() {
+            const jobsList = document.getElementById('jobs-list');
+            
+            try {
+                const response = await fetch('/api/jobs', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Không thể tải danh sách công việc');
+                }
+
+                const jobs = await response.json();
+                
+                if (jobs.length === 0) {
+                    jobsList.innerHTML = '<div class="no-jobs">Hiện tại chưa có công việc nào</div>';
+                    return;
+                }
+
+                // Create job cards
+                jobsList.innerHTML = jobs.map(job => `
+                    <div class="job-card">
+                        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="${job.title}" class="job-image" onerror="this.style.display='none'">` : ''}
+                        <h3 class="job-title">${job.title || 'Chưa có tiêu đề'}</h3>
+                        <div class="job-info">
+                            <div class="job-info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${job.location || 'Chưa có địa điểm'}</span>
+                            </div>
+                            <div class="job-info-item">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>${formatSalary(job.salary)}</span>
+                            </div>
+                            <div class="job-info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${formatDate(job.createdAt)}</span>
+                            </div>
+                        </div>
+                        <p class="job-description">${job.description || 'Chưa có mô tả'}</p>
+                        <div class="job-footer">
+                            <span class="job-status">${job.status === 'OPEN' ? 'Đang tuyển' : 'Đã đóng'}</span>
+                            <button class="apply-btn" onclick="handleApplyClick(${job.id})" ${job.status !== 'OPEN' ? 'disabled' : ''}>
+                                Ứng tuyển ngay
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                jobsList.innerHTML = '<div class="no-jobs">Có lỗi xảy ra khi tải danh sách công việc. Vui lòng thử lại sau.</div>';
+            }
+        }
+
+        // Handle Apply button click
+        function handleApplyClick(jobId) {
+            // Check if user is logged in
+            if (!isUserLoggedIn()) {
+                // Save the job ID to localStorage so we can redirect back after login
+                localStorage.setItem('pendingJobApplication', jobId);
+                
+                // Show alert and redirect to login
+                alert('Bạn cần đăng nhập để ứng tuyển công việc này!');
+                window.location.href = '/login';
+                return;
+            }
+
+            // If logged in, go to apply page with job ID
+            window.location.href = `/apply?jobId=${jobId}`;
+        }
+
+        // Thêm hiệu ứng hover cho các button
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load jobs when page loads
+            loadJobs();
+
+            const buttons = document.querySelectorAll('.btn');
+            
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Thêm hiệu ứng click cho nút đăng nhập
+            const loginBtn = document.querySelector('.btn.login');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = '/login';
+                });
+            }
+
+            // Check if there's a pending job application after login
+            const pendingJobId = localStorage.getItem('pendingJobApplication');
+            if (pendingJobId && isUserLoggedIn()) {
+                localStorage.removeItem('pendingJobApplication');
+                window.location.href = `/apply?jobId=${pendingJobId}`;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
