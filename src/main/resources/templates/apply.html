@@ -21,7 +21,12 @@
         right: 0;
         bottom: 0;
         z-index: 0;
-        background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 50%, #fef6e4 100%);
+        background: linear-gradient(
+          135deg,
+          #e0e7ff 0%,
+          #f0fdfa 50%,
+          #fef6e4 100%
+        );
         width: 100vw;
         height: 100vh;
       }
@@ -138,34 +143,6 @@
         background: #cbd5e1;
       }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 12px;
-        background: #f7faff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 12px rgba(60, 60, 120, 0.08);
-      }
-
-      th,
-      td {
-        padding: 13px 8px;
-        text-align: center;
-      }
-
-      th {
-        background: #e6f0ff;
-        color: #222;
-        font-weight: 600;
-        font-size: 1.05rem;
-      }
-
-      td {
-        background: #fff;
-        color: #333;
-        font-size: 0.99rem;
-      }
       @media (max-width: 700px) {
         .container {
           padding: 16px 4px;
@@ -173,12 +150,6 @@
         .form-actions {
           flex-direction: column;
           gap: 10px;
-        }
-
-        th,
-        td {
-          padding: 8px 4px;
-          font-size: 0.95rem;
         }
         h1 {
           font-size: 1.5rem;
@@ -190,7 +161,6 @@
     <div class="background-gradient"></div>
     <div class="container">
       <h1>Ứng Tuyển</h1>
-
       <form
         class="form"
         id="apply-form"
@@ -212,6 +182,7 @@
             <option value="PENDING">PENDING</option>
           </select>
         </div>
+
         <div class="input-group">
           <label for="job_id">🏢 Job ID-Title</label>
           <input type="text" id="job_id" placeholder="Nhập Job ID" />
@@ -219,18 +190,36 @@
 
         <div class="input-group">
           <label for="cvFile">📄 Nộp CV (file PDF)</label>
-          <input 
-            type="file" 
-            id="cvFile" 
-            name="cvFile" 
-            accept="application/pdf,.pdf" 
+          <input
+            type="file"
+            id="cvFile"
+            name="cvFile"
+            accept="application/pdf,.pdf"
             required
-            style="padding: 11px 13px; border: 1.5px solid #e0e0e0; border-radius: 9px; font-size: 1rem; background: #f7faff; transition: border 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(60, 60, 120, 0.04); width: 100%; box-sizing: border-box;"
+            style="
+              padding: 11px 13px;
+              border: 1.5px solid #e0e0e0;
+              border-radius: 9px;
+              font-size: 1rem;
+              background: #f7faff;
+              transition: border 0.2s, box-shadow 0.2s;
+              box-shadow: 0 1px 2px rgba(60, 60, 120, 0.04);
+              width: 100%;
+              box-sizing: border-box;
+            "
           />
-          <small style="color: #666; font-size: 0.9rem; margin-top: 4px; display: block;">
+          <small
+            style="
+              color: #666;
+              font-size: 0.9rem;
+              margin-top: 4px;
+              display: block;
+            "
+          >
             Chỉ chấp nhận file PDF (tối đa 5MB)
           </small>
         </div>
+
         <div class="form-actions">
           <button type="submit" class="btn save">💾 Lưu</button>
           <button
@@ -243,21 +232,18 @@
         </div>
       </form>
     </div>
+
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
         const role = localStorage.getItem("role");
         const token = localStorage.getItem("token");
         const jobIdInput = document.getElementById("job_id");
-        const tbody = document.getElementById("applications-table-body");
-
-        // 🚫 Phân quyền: chỉ cho APPLICANT
 
         if (role !== "ROLE_APPLICANT") {
           alert("⛔ Bạn không có quyền truy cập trang này!");
           window.location.href = "/trangchu";
           return;
         }
-
 
         // Validate token expiration on page load
         try {
@@ -283,28 +269,21 @@
         if (jobId && jobIdInput) {
           try {
             const response = await fetch(`/api/jobs/${jobId}`, {
-
-              headers: {
-                Authorization: "Bearer " + token,
-              },
+              headers: { Authorization: "Bearer " + token },
             });
-
             if (!response.ok) throw new Error("Không tìm được thông tin Job.");
-
             const job = await response.json();
             jobIdInput.value = `${job.id} - ${job.title}`;
           } catch (err) {
-            console.error("❌ Lỗi khi lấy tên Job:", err.message);
-            jobIdInput.value = jobId; // fallback
+            jobIdInput.value = jobId;
           }
         }
 
-        // ✅ Sự kiện submit form ứng tuyển
+        // Submit form
         document
           .getElementById("apply-form")
-          .addEventListener("submit", async function (e) {
+          .addEventListener("submit", async (e) => {
             e.preventDefault();
-
             if (!token) {
               alert("⚠️ Vui lòng đăng nhập trước khi nộp đơn.");
               window.location.href = "/login";
@@ -333,14 +312,16 @@
 
             const coverLetter = document.getElementById("cover_letter").value;
             const status = document.getElementById("status").value;
-            
+
             // Lấy job ID từ localStorage thay vì parse từ input
             const jobId = localStorage.getItem("selected_job_id");
             if (!jobId) {
-              alert("⚠️ Không tìm thấy Job ID. Vui lòng chọn job từ trang chủ.");
+              alert(
+                "⚠️ Không tìm thấy Job ID. Vui lòng chọn job từ trang chủ."
+              );
               return;
             }
-            
+
             const cvFile = document.getElementById("cvFile").files[0];
 
             if (!cvFile) {
@@ -374,11 +355,14 @@
                 headers: { Authorization: "Bearer " + token },
                 body: formData,
               });
+              console.log("📤 Đã gửi request, chờ phản hồi...");
               if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(errorText || "Có lỗi xảy ra khi nộp đơn");
               }
-              alert("✅ Nộp đơn và CV thành công!");
+              const data = await response.json();
+              console.log("✅ Upload thành công:", data);
+              alert("🎉 Nộp đơn thành công!");
               // Redirect về trang chủ sau khi nộp đơn thành công
               window.location.href = "/trangchu";
             } catch (error) {

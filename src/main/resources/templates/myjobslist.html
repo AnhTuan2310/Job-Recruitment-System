@@ -63,7 +63,7 @@
   <body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
     <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-6xl">
       <div class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold text-blue-600">Danh Sách Jobs</h1>
+        <h1 class="text-2xl font-bold text-blue-600">Danh Sách Công Việc</h1>
         <div>
           <button
             onclick="location.href='trangchu'"
@@ -101,8 +101,8 @@
               class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Tất cả</option>
-              <option value="OPEN">OPEN</option>
-              <option value="CLOSED">CLOSED</option>
+              <option value="OPEN">MỞ</option>
+              <option value="CLOSED">ĐÓNG</option>
             </select>
           </div>
           <div class="w-full md:w-48">
@@ -170,7 +170,7 @@
     <div id="editJobModal" class="modal">
       <div class="modal-content">
         <span class="close">×</span>
-        <h2 class="text-xl font-bold mb-4 text-blue-600">Chỉnh sửa Job</h2>
+        <h2 class="text-xl font-bold mb-4 text-blue-600">Chỉnh sửa Công Việc</h2>
         <form id="editJobForm">
           <input type="hidden" id="edit-job-id" />
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -224,8 +224,8 @@
                 class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 required
               >
-                <option value="OPEN">OPEN</option>
-                <option value="CLOSED">CLOSED</option>
+                <option value="OPEN">MỞ</option>
+                <option value="CLOSED">ĐÓNG</option>
               </select>
             </div>
           </div>

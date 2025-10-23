@@ -45,10 +45,8 @@
             <th class="p-2 border text-gray-700">Mô Tả</th>
             <th class="p-2 border text-gray-700">Trạng Thái</th>
             <th class="p-2 border text-gray-700">Tạo Bởi</th>
-            <th class="p-2 border text-gray-700">Job Title</th>
-            <<<<<<< HEAD =======
+            <th class="p-2 border text-gray-700">Tiêu Đề Công Việc</th>
             <th class="p-2 border text-gray-700">CV(pdf)</th>
-            >>>>>>> quan
             <th class="p-2 border text-gray-700">Thao Tác</th>
           </tr>
         </thead>
@@ -73,9 +71,9 @@
           <div class="mb-4">
             <label class="block text-gray-700">Trạng Thái</label>
             <select id="editStatus" class="w-full p-2 border rounded">
-              <option value="ACCEPTED">ACCEPTED</option>
-              <option value="PENDING">PENDING</option>
-              <option value="REJECTED">REJECTED</option>
+              <option value="ACCEPTED">ĐÃ DUYỆT</option>
+              <option value="PENDING">ĐANG CHỜ</option>
+              <option value="REJECTED">ĐÃ TỪ CHỐI</option>
             </select>
           </div>
           <button
@@ -143,7 +141,11 @@
           // Lấy id/applicant/job theo nhiều fallback (DTO hay entity)
           const appId = app.id ?? app.applicationId ?? "";
           const applicantId = app.applicant?.id ?? app.applicantId ?? "";
-          const applicantName = app.applicant.full_name;
+          const applicantName =
+            app.applicant?.full_name ??
+            app.applicant?.username ??
+            app.applicantName ??
+            "-";
           const jobTitle = app.job?.title ?? app.jobTitle ?? "-";
           const coverLetter = app.coverLetter ?? "-";
           const status = app.status ?? "-";

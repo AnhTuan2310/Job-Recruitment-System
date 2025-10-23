@@ -1,13 +1,12 @@
 package com.example.jobrecruitmentsystem.controller;
 
 import com.example.jobrecruitmentsystem.dto.ApplicationDTO; // Thay đổi import
-import com.example.jobrecruitmentsystem.entity.Application;
-import com.example.jobrecruitmentsystem.entity.Job;
-import com.example.jobrecruitmentsystem.entity.User;
 import com.example.jobrecruitmentsystem.entity.*;
 import com.example.jobrecruitmentsystem.repository.UserRepository;
 import com.example.jobrecruitmentsystem.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +31,8 @@ public class ApplicationController {
     private final ApplicationService applicationService;
     private final UserRepository userRepository;
 
+    
+
     @PostMapping
     @PreAuthorize("hasRole('APPLICANT')")
     public ResponseEntity<Application> apply(@RequestBody ApplicationDTO dto, Authentication authentication) {
@@ -47,7 +48,8 @@ public class ApplicationController {
         return ResponseEntity.ok(application);
     }
 
-
+@Value("${app.upload.dir}")
+private String uploadDir;
     @PostMapping("/upload")
     @PreAuthorize("hasRole('APPLICANT')")
     public ResponseEntity<Application> applyWithFile(
@@ -63,7 +65,7 @@ public class ApplicationController {
             }
 
             String filename = UUID.randomUUID() + "_" + cvFile.getOriginalFilename();
-            Path uploadPath = Paths.get("src/main/resources/static/uploads/cv");
+            Path uploadPath = Paths.get(uploadDir); 
             if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
             Path filePath = uploadPath.resolve(filename);
             Files.copy(cvFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
