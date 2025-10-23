@@ -46,7 +46,7 @@
             <th class="p-2 border text-gray-700">Trạng Thái</th>
             <th class="p-2 border text-gray-700">Tạo Bởi</th>
             <th class="p-2 border text-gray-700">Job Title</th>
-              <th class="p-2 border text-gray-700">CV(pdf)</th>
+            <th class="p-2 border text-gray-700">CV(pdf)</th>
             <th class="p-2 border text-gray-700">Thao Tác</th>
           </tr>
         </thead>
@@ -127,36 +127,36 @@
       // Hàm hiển thị danh sách ứng dụng
       // Thay thế toàn bộ hàm displayApplications bằng đoạn này
       function displayApplications(applys, tbody) {
-          tbody.innerHTML = "";
-          if (!Array.isArray(applys) || applys.length === 0) {
-              tbody.innerHTML = `<tr><td colspan="9" class="text-center text-red-500">❌ Không tìm thấy kết quả.</td></tr>`;
-              return;
-          }
+        tbody.innerHTML = "";
+        if (!Array.isArray(applys) || applys.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="9" class="text-center text-red-500">❌ Không tìm thấy kết quả.</td></tr>`;
+          return;
+        }
 
-          applys.forEach((app, index) => {
-              const row = document.createElement("tr");
-              row.className = "hover:bg-blue-50";
+        applys.forEach((app, index) => {
+          const row = document.createElement("tr");
+          row.className = "hover:bg-blue-50";
 
-              // Lấy id/applicant/job theo nhiều fallback (DTO hay entity)
-              const appId = app.id ?? app.applicationId ?? "";
-              const applicantId = app.applicant?.id ?? app.applicantId ?? "";
-              const applicantName = app.applicant?.full_name ?? app.applicant?.username ?? app.applicantName ?? "-";
-              const jobTitle = app.job?.title ?? app.jobTitle ?? "-";
-              const coverLetter = app.coverLetter ?? "-";
-              const status = app.status ?? "-";
-              const cvUrl = app.cvUrl ? app.cvUrl : null;
+          // Lấy id/applicant/job theo nhiều fallback (DTO hay entity)
+          const appId = app.id ?? app.applicationId ?? "";
+          const applicantId = app.applicant?.id ?? app.applicantId ?? "";
+          const applicantName = app.applicant.full_name;
+          const jobTitle = app.job?.title ?? app.jobTitle ?? "-";
+          const coverLetter = app.coverLetter ?? "-";
+          const status = app.status ?? "-";
+          const cvUrl = app.cvUrl ? app.cvUrl : null;
 
-              // data attribute (dùng để phân quyền xóa)
-              row.setAttribute("data-applicant-id", applicantId);
+          // data attribute (dùng để phân quyền xóa)
+          row.setAttribute("data-applicant-id", applicantId);
 
-              const statusColor =
-                  status === "ACCEPTED"
-                      ? "text-green-600"
-                      : status === "PENDING"
-                          ? "text-yellow-600"
-                          : "text-red-600";
+          const statusColor =
+            status === "ACCEPTED"
+              ? "text-green-600"
+              : status === "PENDING"
+              ? "text-yellow-600"
+              : "text-red-600";
 
-              row.innerHTML = `
+          row.innerHTML = `
       <td class="p-2 border">${appId}</td>
       <td class="p-2 border">${escapeHtml(coverLetter)}</td>
       <td class="p-2 border ${statusColor}">${escapeHtml(status)}</td>
@@ -164,57 +164,60 @@
       <td class="p-2 border">${escapeHtml(jobTitle)}</td>
       <td class="p-2 border text-center">
         ${
-                  cvUrl
-                      ? `<a href="${cvUrl}" target="_blank" class="text-blue-600 hover:underline">Xem CV</a>`
-                      : `<span class="text-gray-400 italic">Chưa có CV</span>`
-              }
+          cvUrl
+            ? `<a href="${cvUrl}" target="_blank" class="text-blue-600 hover:underline">Xem CV</a>`
+            : `<span class="text-gray-400 italic">Chưa có CV</span>`
+        }
       </td>
       <td class="p-2 border text-center">
-        <button onclick="deleteApplication(this, ${appId || 'null'})"
+        <button onclick="deleteApplication(this, ${appId || "null"})"
           class="bg-red-500 text-white p-1 rounded text-xs">Xóa</button>
       </td>
     `;
-              tbody.appendChild(row);
-          });
+          tbody.appendChild(row);
+        });
       }
 
       function escapeHtml(text) {
-          if (text === null || text === undefined) return "";
-          return String(text)
-              .replaceAll("&", "&amp;")
-              .replaceAll("<", "&lt;")
-              .replaceAll(">", "&gt;")
-              .replaceAll('"', "&quot;")
-              .replaceAll("'", "&#039;");
+        if (text === null || text === undefined) return "";
+        return String(text)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
       }
 
       // Hàm tìm kiếm
       function searchApplications() {
-          const searchTerm = document
-              .getElementById("searchInput")
-              .value.trim()
-              .toLowerCase();
-          const tbody = document.getElementById("apply-list-body");
-          if (!searchTerm) {
-              displayApplications(allApplications, tbody); // Hiển thị toàn bộ nếu không có từ khóa
-              return;
-          }
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.trim()
+          .toLowerCase();
+        const tbody = document.getElementById("apply-list-body");
+        if (!searchTerm) {
+          displayApplications(allApplications, tbody); // Hiển thị toàn bộ nếu không có từ khóa
+          return;
+        }
 
-          const filteredApplications = allApplications.filter((app) => {
-              const idStr = (app.id ?? app.applicationId ?? "").toString().toLowerCase();
-              const cover = (app.coverLetter ?? "").toString().toLowerCase();
-              const stat = (app.status ?? "").toString().toLowerCase();
-              const job = (app.job?.title ?? app.jobTitle ?? "").toString().toLowerCase();
-              return (
-                  idStr.includes(searchTerm) ||
-                  cover.includes(searchTerm) ||
-                  stat.includes(searchTerm) ||
-                  job.includes(searchTerm)
-              );
-          });
-          displayApplications(filteredApplications, tbody);
+        const filteredApplications = allApplications.filter((app) => {
+          const idStr = (app.id ?? app.applicationId ?? "")
+            .toString()
+            .toLowerCase();
+          const cover = (app.coverLetter ?? "").toString().toLowerCase();
+          const stat = (app.status ?? "").toString().toLowerCase();
+          const job = (app.job?.title ?? app.jobTitle ?? "")
+            .toString()
+            .toLowerCase();
+          return (
+            idStr.includes(searchTerm) ||
+            cover.includes(searchTerm) ||
+            stat.includes(searchTerm) ||
+            job.includes(searchTerm)
+          );
+        });
+        displayApplications(filteredApplications, tbody);
       }
-
 
       // Hàm mở modal chỉnh sửa
       function editApplication(id, coverLetter, status, applicantId) {
