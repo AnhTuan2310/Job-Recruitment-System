@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng Nhập</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #1a1a1a;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        display: flex;
+        width: 80%;
+        max-width: 1000px;
+        background-color: #222;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .login-form {
+        flex: 1;
+        padding: 40px;
+      }
+      .login-form h2 {
+        color: #00cc99;
+        margin-bottom: 20px;
+      }
+      .login-form p {
+        color: #999;
+        font-size: 14px;
+        margin-bottom: 30px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-group label {
+        display: flex;
+        align-items: center;
+        color: #00cc99;
+        margin-bottom: 5px;
+      }
+      .form-group label i {
+        margin-right: 10px;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 10px;
+        background-color: #333;
+        border: none;
+        border-radius: 5px;
+        color: #fff;
+      }
+      .form-group .forgot-password {
+        color: #00cc99;
+        font-size: 12px;
+        text-align: right;
+        display: block;
+      }
+      .form-group button {
+        width: 100%;
+        padding: 10px;
+        background-color: #00cc99;
+        border: none;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .right-panel {
+        flex: 1;
+        background: linear-gradient(135deg, #00cc99, #1a1a1a);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 40px;
+      }
+      .right-panel h3 {
+        color: #fff;
+        margin-bottom: 10px;
+      }
+      .right-panel p {
+        color: #ddd;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="login-form">
+        <form id="login-form">
+          <h2>Đăng nhập</h2>
+          <p>Vui lòng đăng nhập để sử dụng dịch vụ</p>
+          <div class="form-group">
+            <label><i style="color: #00cc99">&#128231;</i>UserName</label>
+            <input id="username" type="text" placeholder="Username" />
+          </div>
+          <div class="form-group password-wrapper">
+            <label><i style="color: #00cc99">&#128274;</i> Password</label>
+            <div style="position: relative">
+              <input id="password" type="password" placeholder="Password" />
+              <span
+                onclick="togglePassword()"
+                style="
+                  position: absolute;
+                  right: 10px;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  cursor: pointer;
+                "
+                >👁️</span
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <button type="submit">Đăng nhập</button>
+          </div>
+          <div class="form-group">
+            <span class="forgot-password">
+              <button type="button" onclick="window.location.href='/register'">
+                Đăng ký
+              </button>
+            </span>
+          </div>
+        </form>
+      </div>
+      <div class="right-panel">
+        <img
+          src="https://intrastage.com/wp-content/uploads/2019/09/rest-api-icon.png"
+          alt=""
+        />
+      </div>
+    </div>
+    <script>
+      localStorage.removeItem("token");
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          const payload = {
+            username: username,
+            password: password,
+          };
+          try {
+            const response = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+              const data = await response.json(); // data.token hoặc data.accessToken tuỳ API
+              const token = data.token || data.accessToken;
+
+              // 👉 Lưu JWT token vào localStorage (giữ phiên)
+              localStorage.setItem("token", token);
+
+              // 👉 Decode token để lấy role từ payload
+              const payload = JSON.parse(atob(token.split(".")[1]));
+
+              // ⚠️ Tùy backend: role có thể là "role", "roles", hoặc "authorities"
+              const role =
+                payload.role || payload.roles?.[0] || payload.authorities?.[0];
+
+              if (role) {
+                localStorage.setItem("role", role);
+              }
+              const userId = payload.id || payload.userId;
+              if (userId) {
+                localStorage.setItem("id", userId);
+              }
+              alert("Đăng nhập thành công!");
+              
+              // Check if there's a pending job application
+              const pendingJobId = localStorage.getItem('pendingJobApplication');
+              if (pendingJobId) {
+                localStorage.removeItem('pendingJobApplication');
+                window.location.href = `/apply?jobId=${pendingJobId}`;
+              } else {
+                window.location.href = "/trangchu"; // hoặc redirect FE khác
+              }
+            } else {
+              if (response.status === 401 || response.status === 403) {
+                alert("❌ Lỗi hệ thống. Vui lòng thử lại sau.");
+              } else if (response.status === 500) {
+                alert("❌ Sai tên đăng nhập hoặc mật khẩu!");
+              } else {
+                const errText = await response.text();
+                alert("Lỗi đăng nhập: " + errText);
+              }
+            }
+          } catch (err) {
+            alert("Lỗi kết nối: " + err.message);
+          }
+        });
+      function togglePassword() {
+        const pwdInput = document.getElementById("password");
+        const icon = pwdInput.nextElementSibling;
+        if (pwdInput.type === "password") {
+          pwdInput.type = "text";
+          icon.textContent = "🙈";
+        } else {
+          pwdInput.type = "password";
+          icon.textContent = "👁️";
+        }
+      }
+    </script>
+  </body>
+</html>

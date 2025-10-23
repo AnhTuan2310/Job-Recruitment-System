@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .debug-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #00cc99;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #00b380;
+        }
+        #debug-output {
+            margin-top: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<h1>Dashboard - Debug Area</h1>
+<div class="debug-section">
+    <h2>Debug Controls</h2>
+    <button onclick="loadUsers()">Load Users</button>
+    <button onclick="getinfo()">Get User Info</button>
+    <button onclick="showToken()">Show JWT Token</button>
+    <div id="debug-output">Output will appear here...</div>
+    <button onclick="logout()">Logout</button>
+</div>
+<div id="user-list"></div>
+
+<script>
+    const role = localStorage.getItem("role");
+
+    // Chỉ cho ADMIN và COMPANY truy cập trang dashboard
+    if (role !== "ROLE_ADMIN") {
+        alert("⛔ Bạn không có quyền truy cập trang này!");
+        window.location.href = "/trangchu";
+    }
+    async function loadUsers() {
+        const token = localStorage.getItem("token");
+        const output = document.getElementById("debug-output");
+
+        if (!token) {
+            output.innerHTML = "<p style='color:red'>⚠️ Không có token. Vui lòng đăng nhập lại.</p>";
+            return;
+        }
+        try {
+            const response = await fetch("/api/users", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+
+                if (response.status === 403) {
+                    output.innerHTML = "<p style='color:red'>❌ Bạn không có quyền truy cập (403 Forbidden)</p>";
+                } else if (response.status === 401) {
+                    output.innerHTML = "<p style='color:red'>❌ Token không hợp lệ hoặc chưa đăng nhập (401 Unauthorized)</p>";
+                } else if (response.status === 404) {
+                    output.innerHTML = "<p style='color:red'>❌ API không tồn tại (404)</p>";
+                } else {
+                    output.innerHTML = "<p style='color:red'>❌ Lỗi tải user: " + errorText + "</p>";
+                }
+                return;
+            }
+
+            const users = await response.json();
+            if (users.length === 0) {
+                output.innerHTML = "<p>Không có người dùng nào trong hệ thống.</p>";
+                return;
+            }
+            // Render table
+            let html = `
+      <table border="1" cellpadding="8" cellspacing="0" style="margin: 20px auto; background: #fff;">
+        <thead>
+          <tr><th>ID</th><th>Username</th><th>Email</th><th>FullName</th><th>Role</th></tr>
+        </thead><tbody>
+    `;
+
+            for (const user of users) {
+                html += `
+        <tr>
+          <td>${user.id}</td>
+          <td>${user.username}</td>
+          <td>${user.email}</td>
+          <td>${user.full_name}</td>
+          <td>${user.role}</td>
+        </tr>
+      `;
+            }
+            html += "</tbody></table>";
+            output.innerHTML = html;
+
+        } catch (err) {
+            output.innerHTML = "<p style='color:red'>❌ Lỗi kết nối: " + err.message + "</p>";
+        }
+    }
+    async function getinfo() {
+        const token = localStorage.getItem("token");
+        const output = document.getElementById("debug-output");
+
+        if (!token) {
+            output.innerHTML = "<p style='color:red'>⚠️ Không có token. Vui lòng đăng nhập lại.</p>";
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/users/me", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                output.innerHTML = `<p style='color:red'>❌ Lỗi khi lấy thông tin user: ${errorText}</p>`;
+                return;
+            }
+
+            const user = await response.json();
+
+            const html = `
+            <table border="1" cellpadding="8" cellspacing="0" style="margin: 20px auto; background: #fff;">
+                <thead>
+                    <tr><th>ID</th><th>Username</th><th>Email</th><th>FullName</th><th>Role</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.full_name}</td>
+                        <td>${user.role}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>✅ Thông tin user hiện tại được hiển thị lúc ${new Date().toLocaleString()}</p>
+            `;
+            output.innerHTML = html;
+
+        } catch (err) {
+            output.innerHTML = `<p style='color:red'>❌ Lỗi kết nối đến server: ${err.message}</p>`;
+        }
+    }
+    function showToken() {
+        const output = document.getElementById("debug-output");
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+
+        if (token) {
+            output.innerHTML = `
+            <strong>JWT Token:</strong><br>
+            <textarea style="width:100%;height:150px">${token} ">>>>>>>>>>" ${role}</textarea>
+            <br>Status: Token loaded at ${new Date().toLocaleString()}
+        `;
+        } else {
+            output.innerHTML = "⚠️ Không tìm thấy token trong localStorage.";
+        }
+    }
+    function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        alert("Đã đăng xuất!");
+        window.location.href = "/login";
+    }
+</script>
+</body>
+</html>

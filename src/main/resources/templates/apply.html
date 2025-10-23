@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ứng Tuyển</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        min-height: 100vh;
+        position: relative;
+        z-index: 1;
+      }
+
+      .background-gradient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+        background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 50%, #fef6e4 100%);
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 950px;
+        margin: 48px auto;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(60, 60, 120, 0.13);
+        padding: 40px 36px 32px 36px;
+        backdrop-filter: blur(2px);
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 2.6rem;
+        margin-bottom: 36px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        color: #222;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        margin-bottom: 36px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .input-group label {
+        font-weight: 500;
+        color: #333;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .form input[type="text"],
+      .form textarea,
+      .form select,
+      .form input[type="file"] {
+        padding: 11px 13px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 9px;
+        font-size: 1rem;
+        background: #f7faff;
+        transition: border 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 2px rgba(60, 60, 120, 0.04);
+      }
+
+      .form input[type="text"]:focus,
+      .form textarea:focus,
+      .form select:focus {
+        border: 1.5px solid #4f8cff;
+        outline: none;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(79, 140, 255, 0.08);
+      }
+
+      .form textarea {
+        resize: vertical;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 18px;
+        margin-top: 10px;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        padding: 11px 30px;
+        border: none;
+        border-radius: 9px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 8px rgba(60, 60, 120, 0.07);
+      }
+
+      .btn.save {
+        background: linear-gradient(90deg, #4f8cff 60%, #38bdf8 100%);
+        color: #fff;
+      }
+
+      .btn.save:hover {
+        background: linear-gradient(90deg, #2563eb 60%, #0ea5e9 100%);
+      }
+
+      .btn.home {
+        background: #e0e7ef;
+        color: #222;
+      }
+
+      .btn.home:hover {
+        background: #cbd5e1;
+      }
+
+      @media (max-width: 700px) {
+        .container {
+          padding: 16px 4px;
+        }
+        .form-actions {
+          flex-direction: column;
+          gap: 10px;
+        }
+        h1 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background-gradient"></div>
+    <div class="container">
+      <h1>Ứng Tuyển</h1>
+      <form
+        class="form"
+        id="apply-form"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <div class="input-group">
+          <label for="cover_letter">📝 Mô tả</label>
+          <textarea
+            id="cover_letter"
+            rows="4"
+            placeholder="Mô tả về bản thân hoặc vị trí ứng tuyển"
+          ></textarea>
+        </div>
+
+        <div class="input-group">
+          <label for="status">⏳ Trạng thái</label>
+          <select id="status">
+            <option value="PENDING">PENDING</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="job_id">🏢 Job ID-Title</label>
+          <input type="text" id="job_id" placeholder="Nhập Job ID" />
+        </div>
+
+        <div class="input-group">
+          <label for="cvFile">📄 Nộp CV (file PDF)</label>
+          <input 
+            type="file" 
+            id="cvFile" 
+            name="cvFile" 
+            accept="application/pdf,.pdf" 
+            required
+            style="padding: 11px 13px; border: 1.5px solid #e0e0e0; border-radius: 9px; font-size: 1rem; background: #f7faff; transition: border 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(60, 60, 120, 0.04); width: 100%; box-sizing: border-box;"
+          />
+          <small style="color: #666; font-size: 0.9rem; margin-top: 4px; display: block;">
+            Chỉ chấp nhận file PDF (tối đa 5MB)
+          </small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn save">💾 Lưu</button>
+          <button
+            type="button"
+            class="btn home"
+            onclick="location.href='trangchu'"
+          >
+            🏠 TRANG CHỦ
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const role = localStorage.getItem("role");
+        const token = localStorage.getItem("token");
+        const jobIdInput = document.getElementById("job_id");
+
+        if (role !== "ROLE_APPLICANT") {
+          alert("⛔ Bạn không có quyền truy cập trang này!");
+          window.location.href = "/trangchu";
+          return;
+        }
+
+        // Validate token expiration on page load
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          if (payload.exp && payload.exp < currentTime) {
+            alert("⚠️ Token đã hết hạn. Vui lòng đăng nhập lại.");
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            window.location.href = "/login";
+            return;
+          }
+        } catch (error) {
+          alert("⚠️ Token không hợp lệ. Vui lòng đăng nhập lại.");
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          window.location.href = "/login";
+          return;
+        }
+
+        // Lấy Job ID & Title
+        const jobId = localStorage.getItem("selected_job_id");
+        if (jobId && jobIdInput) {
+          try {
+            const response = await fetch(`/api/jobs/${jobId}`, {
+              headers: { Authorization: "Bearer " + token },
+            });
+            if (!response.ok) throw new Error("Không tìm được thông tin Job.");
+            const job = await response.json();
+            jobIdInput.value = `${job.id} - ${job.title}`;
+          } catch (err) {
+            jobIdInput.value = jobId;
+          }
+        }
+
+        // Submit form
+        document
+          .getElementById("apply-form")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!token) {
+              alert("⚠️ Vui lòng đăng nhập trước khi nộp đơn.");
+              window.location.href = "/login";
+              return;
+            }
+
+            // Validate token expiration
+            try {
+              const payload = JSON.parse(atob(token.split(".")[1]));
+              const currentTime = Math.floor(Date.now() / 1000);
+              if (payload.exp && payload.exp < currentTime) {
+                alert("⚠️ Token đã hết hạn. Vui lòng đăng nhập lại.");
+                localStorage.removeItem("token");
+                localStorage.removeItem("role");
+                window.location.href = "/login";
+                return;
+              }
+              var applicantId = payload.id || payload.user_id || payload.sub;
+            } catch (error) {
+              alert("⚠️ Token không hợp lệ. Vui lòng đăng nhập lại.");
+              localStorage.removeItem("token");
+              localStorage.removeItem("role");
+              window.location.href = "/login";
+              return;
+            }
+
+            const coverLetter = document.getElementById("cover_letter").value;
+            const status = document.getElementById("status").value;
+            
+            // Lấy job ID từ localStorage thay vì parse từ input
+            const jobId = localStorage.getItem("selected_job_id");
+            if (!jobId) {
+              alert("⚠️ Không tìm thấy Job ID. Vui lòng chọn job từ trang chủ.");
+              return;
+            }
+            
+            const cvFile = document.getElementById("cvFile").files[0];
+
+            if (!cvFile) {
+              alert("⚠️ Vui lòng chọn file PDF CV để nộp.");
+              return;
+            }
+
+            // Validate file type
+            if (cvFile.type !== "application/pdf") {
+              alert("⚠️ Vui lòng chỉ chọn file PDF.");
+              return;
+            }
+
+            // Validate file size (5MB max)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (cvFile.size > maxSize) {
+              alert("⚠️ File PDF quá lớn. Vui lòng chọn file nhỏ hơn 5MB.");
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append("coverLetter", coverLetter);
+            formData.append("status", status);
+            formData.append("applicant_id", applicantId);
+            formData.append("jobId", parseInt(jobId));
+            formData.append("cvFile", cvFile);
+
+            try {
+              const response = await fetch("/api/applications/upload", {
+                method: "POST",
+                headers: { Authorization: "Bearer " + token },
+                body: formData,
+              });
+              if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Có lỗi xảy ra khi nộp đơn");
+              }
+              alert("✅ Nộp đơn và CV thành công!");
+              // Redirect về trang chủ sau khi nộp đơn thành công
+              window.location.href = "/trangchu";
+            } catch (error) {
+              console.error("❌ Lỗi nộp đơn:", error);
+              alert("❌ Gửi CV thất bại: " + error.message);
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

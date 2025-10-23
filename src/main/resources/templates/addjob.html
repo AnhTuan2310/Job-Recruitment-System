@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thêm Job</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #e0e8ef;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        width: 80%;
+        max-width: 800px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #0078d4;
+        margin-bottom: 20px;
+        font-size: 30px;
+      }
+      form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group.full-width {
+        grid-column: span 2;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: bold;
+        font-size: 18px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      textarea {
+        height: 100px;
+        resize: vertical;
+      }
+      input[type="file"] {
+        padding: 5px;
+      }
+      .buttons {
+        grid-column: span 2;
+        text-align: right;
+        margin-top: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button[type="submit"] {
+        background-color: #0078d4;
+        color: white;
+      }
+      button[type="button"] {
+        background-color: #f28c38;
+        color: white;
+        margin-left: 10px;
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: #f8f8f8;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #2c3e50;
+        color: white;
+      }
+      .job-image {
+        width: 50px;
+        height: auto;
+        border-radius: 5px;
+      }
+      @media (max-width: 600px) {
+        form {
+          grid-template-columns: 1fr;
+        }
+        .form-group.full-width {
+          grid-column: span 1;
+        }
+        .buttons {
+          grid-column: span 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 style="font-size: 50px">Thêm Job</h1>
+      <form id="jobForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="title">Tiêu đề</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            required
+            placeholder="Nhập tiêu đề công việc"
+          />
+        </div>
+        <div class="form-group">
+          <label for="location">Địa điểm</label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            required
+            placeholder="Nhập địa điểm"
+          />
+        </div>
+        <div class="form-group">
+          <label for="salary">Lương (VND)</label>
+          <input
+            type="number"
+            id="salary"
+            name="salary"
+            required
+            placeholder="Nhập mức lương"
+          />
+        </div>
+        <div class="form-group">
+          <label for="status">Trạng thái</label>
+          <select id="status" name="status" required>
+            <option value="OPEN">OPEN</option>
+            <option value="CLOSED">CLOSED</option>
+          </select>
+        </div>
+        <!-- <div class="form-group">
+          <label for="create_by">Create By</label>
+          <input
+            type="number"
+            id="create_by"
+            name="create_by"
+            required
+            placeholder="Nhập ID người tạo"
+          />
+        </div> -->
+        <div class="form-group">
+          <label for="image">Hình ảnh</label>
+          <input type="file" id="image" name="image" accept="image/*" />
+        </div>
+        <div class="form-group full-width">
+          <label for="description">Mô tả</label>
+          <textarea
+            id="description"
+            name="description"
+            required
+            placeholder="Nhập mô tả công việc"
+          ></textarea>
+        </div>
+        <div class="buttons">
+          <button type="submit">Lưu</button>
+          <button type="button">
+            <a href="trangchu" style="color: white; text-decoration: none"
+              >Thoát</a
+            >
+          </button>
+        </div>
+      </form>
+      <table id="jobTable">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Hình ảnh</th>
+            <th>Tiêu đề</th>
+            <th>Mô tả</th>
+            <th>Địa điểm</th>
+            <th>Lương</th>
+            <th>Trạng Thái</th>
+            <th>Tạo Bởi</th>
+          </tr>
+        </thead>
+        <tbody id="jobTableBody"></tbody>
+      </table>
+    </div>
+    <script>
+      window.addEventListener("DOMContentLoaded", loadJobs);
+      const role = localStorage.getItem("role");
+
+      if (role != "ROLE_ADMIN" && role != "ROLE_COMPANY") {
+        alert("⛔ Bạn không có quyền truy cập trang này!");
+        window.location.href = "/trangchu";
+      }
+      //xử lý gửi form công việc
+      document
+        .getElementById("jobForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault(); // Ngăn form gửi mặc định
+
+          const title = document.getElementById("title").value;
+          const location = document.getElementById("location").value;
+          const salary = parseFloat(document.getElementById("salary").value);
+          const status = document.getElementById("status").value;
+          const created_by = localStorage.getItem("id");
+          const description = document.getElementById("description").value;
+          const image = document.getElementById("image").files[0];
+
+          const jobData = {
+            title,
+            location,
+            salary,
+            status,
+            created_by,
+            description,
+          };
+
+          try {
+            const res = await fetch("/api/jobs", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("token"),
+              },
+              body: JSON.stringify(jobData),
+            });
+
+            if (!res.ok) {
+              const text = await res.text();
+              throw new Error(text);
+            }
+
+            const job = await res.json();
+            const jobId = job.id;
+            localStorage.setItem("jobId", jobId); // lưu tạm
+
+            if (image) {
+              const formData = new FormData();
+              formData.append("image", image);
+
+              const uploadRes = await fetch(
+                `/api/upload-images/jobs/${jobId}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                  },
+                  body: formData,
+                }
+              );
+
+              if (!uploadRes.ok) throw new Error("Upload ảnh thất bại!");
+
+              // ✅ Chờ 1 giây rồi mới load lại bảng cho ảnh kịp render
+              setTimeout(() => {
+                loadJobs();
+                localStorage.removeItem("jobId");
+              }, 1000);
+            } else {
+              loadJobs();
+              localStorage.removeItem("jobId");
+            }
+
+            alert("Tạo Job thành công!");
+            document.getElementById("jobForm").reset();
+          } catch (err) {
+            alert("Lỗi khi tạo Job: " + err.message);
+            console.error(err);
+          }
+        });
+
+      function loadJobs() {
+        fetch("/api/jobs", {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        })
+          .then((response) => response.json())
+          .then((jobs) => {
+            const tbody = document.getElementById("jobTableBody");
+            tbody.innerHTML = ""; // xoá bảng cũ
+
+            jobs.forEach((job, index) => {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td><img src="${
+          job.imageUrl
+        }" alt="Job Image" class="job-image" width="50"></td>
+        <td>${job.title}</td>
+        <td>${job.description}</td>
+        <td>${job.location}</td>
+        <td>${job.salary.toLocaleString()}</td>
+        <td>${job.status}</td>
+        <td>${job.createdBy?.id || "-"}</td>
+    `;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch((err) => {
+            console.error("Lỗi khi tải danh sách job:", err);
+          });
+      }
+    </script>
+  </body>
+</html>

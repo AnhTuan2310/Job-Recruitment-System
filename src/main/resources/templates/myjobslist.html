@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh Sách Jobs</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Modal styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .close:hover {
+        color: black;
+      }
+      /* Loading spinner */
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: #3b82f6;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-6xl">
+      <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-blue-600">Danh Sách Jobs</h1>
+        <div>
+          <button
+            onclick="location.href='trangchu'"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Trang Chủ
+          </button>
+        </div>
+      </div>
+
+      <!-- Thêm phần tìm kiếm -->
+      <div class="mb-6 bg-gray-100 p-4 rounded-lg">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <label
+              for="search-keyword"
+              class="block text-gray-700 mb-2 font-medium"
+              >Tìm kiếm</label
+            >
+            <input
+              type="text"
+              id="search-keyword"
+              placeholder="Nhập từ khóa (tiêu đề, mô tả, địa điểm...)"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="w-full md:w-48">
+            <label
+              for="search-status"
+              class="block text-gray-700 mb-2 font-medium"
+              >Trạng thái</label
+            >
+            <select
+              id="search-status"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Tất cả</option>
+              <option value="OPEN">OPEN</option>
+              <option value="CLOSED">CLOSED</option>
+            </select>
+          </div>
+          <div class="w-full md:w-48">
+            <label
+              for="search-salary"
+              class="block text-gray-700 mb-2 font-medium"
+              >Lương từ</label
+            >
+            <select
+              id="search-salary"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Tất cả</option>
+              <option value="10000000">10 triệu+</option>
+              <option value="15000000">15 triệu+</option>
+              <option value="20000000">20 triệu+</option>
+              <option value="30000000">30 triệu+</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button
+              id="search-button"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 h-[42px] rounded"
+            >
+              Tìm kiếm
+            </button>
+            <button
+              id="reset-search"
+              class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 h-[42px] rounded ml-2"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-blue-100">
+              <th class="p-3 border text-gray-700">ID</th>
+              <th class="p-3 border text-gray-700">Ảnh</th>
+              <th class="p-3 border text-gray-700">Tiêu đề</th>
+              <th class="p-3 border text-gray-700">Mô tả</th>
+              <th class="p-3 border text-gray-700">Vị trí</th>
+              <th class="p-3 border text-gray-700">Lương (VND)</th>
+              <th class="p-3 border text-gray-700">Trạng thái</th>
+              <th class="p-3 border text-gray-700">Tạo bởi</th>
+              <th class="p-3 border text-gray-700">Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="job-table-body">
+            <tr>
+              <td colspan="9" class="text-center p-4">
+                <div class="spinner"></div>
+                <p>Đang tải dữ liệu...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal chỉnh sửa Job -->
+    <div id="editJobModal" class="modal">
+      <div class="modal-content">
+        <span class="close">×</span>
+        <h2 class="text-xl font-bold mb-4 text-blue-600">Chỉnh sửa Job</h2>
+        <form id="editJobForm">
+          <input type="hidden" id="edit-job-id" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label
+                for="edit-title"
+                class="block text-gray-700 mb-2 font-medium"
+                >Tiêu đề</label
+              >
+              <input
+                type="text"
+                id="edit-title"
+                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label
+                for="edit-location"
+                class="block text-gray-700 mb-2 font-medium"
+                >Địa điểm</label
+              >
+              <input
+                type="text"
+                id="edit-location"
+                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label
+                for="edit-salary"
+                class="block text-gray-700 mb-2 font-medium"
+                >Lương (VND)</label
+              >
+              <input
+                type="number"
+                id="edit-salary"
+                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label
+                for="edit-status"
+                class="block text-gray-700 mb-2 font-medium"
+                >Trạng thái</label
+              >
+              <select
+                id="edit-status"
+                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="OPEN">OPEN</option>
+                <option value="CLOSED">CLOSED</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label
+              for="edit-description"
+              class="block text-gray-700 mb-2 font-medium"
+              >Mô tả</label
+            >
+            <textarea
+              id="edit-description"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              rows="4"
+              required
+            ></textarea>
+          </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              id="cancelEdit"
+              class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded mr-2"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center"
+            >
+              <span id="save-text">Lưu thay đổi</span>
+              <span id="save-spinner" class="hidden ml-2">
+                <div
+                  class="spinner"
+                  style="width: 20px; height: 20px; border-width: 2px"
+                ></div>
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Modal chi tiết Job -->
+    <div id="jobDetailsModal" class="modal">
+      <div class="modal-content">
+        <span class="close-details" onclick="closeJobDetails()">×</span>
+        <div id="jobInfo" class="mb-4"></div>
+        <div id="applicationTableWrapper">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">
+            Danh sách đơn ứng tuyển:
+          </h3>
+          <table class="w-full border">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="p-2 border">ID</th>
+                <th class="p-2 border">Người Ứng Tuyển</th>
+                <th class="p-2 border">Thư Ứng Tuyển</th>
+                <th class="p-2 border">Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody id="applicationTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 text-right">
+          <button
+            onclick="closeJobDetails()"
+            class="bg-gray-500 text-white px-4 py-2 rounded"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      console.log("id: " + localStorage.getItem("id"));
+      function getUserIdFromToken() {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.id || payload.userId || null;
+      }
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Kiểm tra đăng nhập và quyền
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+
+        if (!token) {
+          alert("⛔ Vui lòng đăng nhập để tiếp tục!");
+          window.location.href = "/login";
+          return;
+        }
+
+        // DOM Elements
+        const tbody = document.getElementById("job-table-body");
+        const modal = document.getElementById("editJobModal");
+        const closeBtn = document.querySelector(".close");
+        const cancelBtn = document.getElementById("cancelEdit");
+        const editForm = document.getElementById("editJobForm");
+        const saveSpinner = document.getElementById("save-spinner");
+        const saveText = document.getElementById("save-text");
+        const searchKeyword = document.getElementById("search-keyword");
+        const searchStatus = document.getElementById("search-status");
+        const searchSalary = document.getElementById("search-salary");
+        const searchButton = document.getElementById("search-button");
+        const resetSearch = document.getElementById("reset-search");
+
+        // API Base URL
+        const API_BASE_URL = "http://localhost:8080/api"; // Thay đổi nếu cần
+
+        // Biến lưu trữ danh sách jobs gốc
+        let originalJobs = [];
+
+        // Hàm hiển thị thông báo
+        function showAlert(message, type = "success") {
+          const alertDiv = document.createElement("div");
+          alertDiv.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg ${
+            type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`;
+          alertDiv.textContent = message;
+          document.body.appendChild(alertDiv);
+
+          setTimeout(() => {
+            alertDiv.remove();
+          }, 3000);
+        }
+
+        // Hàm mở modal chỉnh sửa
+        async function openEditModal(jobId) {
+          try {
+            document.getElementById("edit-title").disabled = true;
+            saveSpinner.classList.remove("hidden");
+            saveText.textContent = "Đang tải...";
+
+            const response = await fetch(`/api/jobs/${jobId}`, {
+              headers: { Authorization: "Bearer " + token },
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(
+                errorData.message || "Không thể lấy thông tin job"
+              );
+            }
+
+            const job = await response.json();
+
+            // 🛑 Check quyền chỉnh sửa tại đây
+            const currentUserId = getUserIdFromToken();
+            if (role !== "ROLE_ADMIN" && job.createdBy?.id !== currentUserId) {
+              showAlert("⛔ Bạn không thể sửa Job của người khác!", "error");
+              return;
+            }
+
+            // Fill form
+            document.getElementById("edit-job-id").value = job.id;
+            document.getElementById("edit-title").value = job.title;
+            document.getElementById("edit-location").value = job.location;
+            document.getElementById("edit-salary").value = job.salary;
+            document.getElementById("edit-status").value = job.status;
+            document.getElementById("edit-description").value = job.description;
+
+            document.getElementById("edit-title").disabled = false;
+            saveSpinner.classList.add("hidden");
+            saveText.textContent = "Lưu thay đổi";
+
+            modal.style.display = "block";
+          } catch (error) {
+            console.error("Lỗi khi mở modal:", error);
+            showAlert(`Lỗi: ${error.message}`, "error");
+          }
+        }
+
+        // Hàm đóng modal chỉnh sửa
+        function closeEditModal() {
+          if (confirm("Bạn có chắc muốn hủy chỉnh sửa?")) {
+            modal.style.display = "none";
+            editForm.reset();
+          }
+        }
+
+        // Xử lý sự kiện đóng modal chỉnh sửa
+        closeBtn.onclick = closeEditModal;
+        cancelBtn.addEventListener("click", closeEditModal);
+        window.onclick = function (event) {
+          if (event.target == modal) {
+            closeEditModal();
+          }
+        };
+
+        // Xử lý submit form chỉnh sửa
+        editForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const jobId = document.getElementById("edit-job-id").value;
+          const updatedJob = {
+            title: document.getElementById("edit-title").value,
+            location: document.getElementById("edit-location").value,
+            salary: parseFloat(document.getElementById("edit-salary").value),
+            status: document.getElementById("edit-status").value,
+            description: document.getElementById("edit-description").value,
+          };
+
+          try {
+            // Hiển thị loading
+            saveSpinner.classList.remove("hidden");
+            saveText.textContent = "Đang lưu...";
+
+            const response = await fetch(`/api/jobs/${jobId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+              },
+              body: JSON.stringify(updatedJob),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || "Cập nhật thất bại");
+            }
+
+            const data = await response.json();
+            showAlert("Cập nhật job thành công!");
+            closeEditModal();
+            await loadJobs();
+          } catch (error) {
+            console.error("Lỗi khi cập nhật:", error);
+            showAlert(`Lỗi: ${error.message}`, "error");
+          } finally {
+            saveSpinner.classList.add("hidden");
+            saveText.textContent = "Lưu thay đổi";
+          }
+        });
+
+        // Hàm xóa job
+        async function deleteJob(jobId) {
+          const currentUserId = getUserIdFromToken();
+          const role = localStorage.getItem("role");
+
+          try {
+            // 🟡 Lấy chi tiết job trước
+            const detailRes = await fetch(`/api/jobs/${jobId}`, {
+              headers: { Authorization: "Bearer " + token },
+            });
+
+            if (!detailRes.ok) {
+              const errorData = await detailRes.json();
+              throw new Error(
+                errorData.message || "Không thể lấy thông tin job"
+              );
+            }
+            
+
+            const job = await detailRes.json();
+
+            // 🔐 So sánh quyền
+            if (role !== "ROLE_ADMIN" && job.createdBy?.id !== currentUserId) {
+              showAlert("⛔ Bạn không thể xóa job của người khác!", "error");
+              return;
+            }
+
+            // ✅ Hỏi xác nhận trước khi xóa
+            if (!confirm("Bạn có chắc chắn muốn xóa job này?")) return;
+
+            const response = await fetch(`/api/jobs/${jobId}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || "Xóa thất bại");
+            }
+
+            showAlert("✅ Xóa job thành công!");
+            await loadJobs();
+          } catch (error) {
+            console.error("Lỗi khi xóa job:", error);
+            showAlert(`Lỗi: ${error.message}`, "error");
+          }
+        }
+
+        // Hàm tìm kiếm jobs
+        function searchJobs() {
+          const keyword = searchKeyword.value.toLowerCase();
+          const status = searchStatus.value;
+          const minSalary = searchSalary.value
+            ? parseInt(searchSalary.value)
+            : 0;
+
+          // Lọc danh sách jobs theo điều kiện tìm kiếm
+          const filteredJobs = originalJobs.filter((job) => {
+            const matchKeyword =
+              job.title.toLowerCase().includes(keyword) ||
+              job.description.toLowerCase().includes(keyword) ||
+              job.location.toLowerCase().includes(keyword);
+
+            const matchStatus = status === "" || job.status === status;
+            const matchSalary = minSalary === 0 || job.salary >= minSalary;
+
+            return matchKeyword && matchStatus && matchSalary;
+          });
+
+          // Hiển thị kết quả
+          renderJobs(filteredJobs);
+        }
+
+        // Hàm reset tìm kiếm
+        function resetSearchJobs() {
+          searchKeyword.value = "";
+          searchStatus.value = "";
+          searchSalary.value = "";
+          renderJobs(originalJobs);
+        }
+
+        // Hàm hiển thị danh sách jobs
+        function renderJobs(jobs) {
+          if (jobs.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="9" class="text-center p-4 text-gray-500">
+                  Không tìm thấy job nào phù hợp
+                </td>
+              </tr>
+            `;
+            return;
+          }
+
+          tbody.innerHTML = "";
+
+          jobs.forEach((job) => {
+            console.log("Job " + job.id + "-IMG:" + job.imageUrl);
+            const row = document.createElement("tr");
+            row.className = "hover:bg-blue-50";
+
+            row.innerHTML = `
+              <td class="p-3 border">${job.id}</td>
+              <td class="p-3 border">
+                <img src="${job.imageUrl}"
+                     alt="Job Image"
+                     class="w-10 h-10 object-cover rounded">
+              </td>
+              <td class="p-3 border font-medium">${job.title}</td>
+              <td class="p-3 border text-gray-600">${job.description.substring(
+                0,
+                50
+              )}${job.description.length > 50 ? "..." : ""}</td>
+              <td class="p-3 border">${job.location}</td>
+              <td class="p-3 border font-medium">${job.salary.toLocaleString()} VND</td>
+              <td class="p-3 border">
+                <span class="px-2 py-1 rounded-full text-xs ${
+                  job.status === "OPEN"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }">
+                  ${job.status}
+                </span>
+              </td>
+              <td class="p-3 border">${job.createdBy?.full_name || "-"}</td>
+              <td class="p-3 border text-center">
+                <button type="button"
+                        class="bg-green-500 hover:bg-green-600 text-white p-1 rounded text-xs mr-1 select-job"
+                        data-id="${job.id}">
+                  Chọn
+                </button>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white p-1 rounded text-xs mr-1 edit-job"
+                        data-id="${job.id}">
+                  Sửa
+                </button>
+                <button class="bg-red-500 hover:bg-red-600 text-white p-1 rounded text-xs delete-job"
+                        data-id="${job.id}">
+                  Xóa
+                </button>
+                <button onclick="showJobDetails(${job.id})"
+                        class="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded text-xs">
+                  Chi tiết
+                </button>
+              </td>
+            `;
+
+            tbody.appendChild(row);
+          });
+
+          // Gắn sự kiện click cho nút Chọn
+          document.querySelectorAll(".select-job").forEach((button) => {
+            button.addEventListener("click", () => {
+              const jobId = button.getAttribute("data-id");
+              localStorage.setItem("selected_job_id", jobId);
+              location.href = "/apply";
+            });
+          });
+
+          // Gắn sự kiện click cho nút Sửa
+          document.querySelectorAll(".edit-job").forEach((button) => {
+            button.addEventListener("click", () => {
+              if (role !== "ROLE_ADMIN" && role !== "ROLE_COMPANY") {
+                alert("⛔ Bạn không có quyền truy cập trang này!");
+                window.location.href = "/jobslist";
+                return;
+              }
+              const jobId = button.getAttribute("data-id");
+              openEditModal(jobId);
+            });
+          });
+
+          // Gắn sự kiện click cho nút Xóa
+          document.querySelectorAll(".delete-job").forEach((button) => {
+            button.addEventListener("click", () => {
+              if (role !== "ROLE_ADMIN" && role !== "ROLE_COMPANY") {
+                alert("⛔ Bạn không có quyền truy cập trang này!");
+                window.location.href = "/jobslist";
+                return;
+              }
+              const jobId = button.getAttribute("data-id");
+              deleteJob(jobId);
+            });
+          });
+        }
+
+        // Hàm tải danh sách jobs từ API
+        async function loadJobs() {
+          try {
+            tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center p-4">
+          <div class="spinner"></div>
+          <p>Đang tải dữ liệu...</p>
+        </td>
+      </tr>
+    `;
+
+            const response = await fetch(`/api/jobs/my`, {
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(
+                errorData.message || "Không thể tải danh sách jobs bạn đã tạo"
+              );
+            }
+
+            const jobs = await response.json();
+
+            if (jobs.length === 0) {
+              showAlert("🔍 Bạn chưa tạo job nào!", "error");
+              window.location.href = "/trangchu";
+              return;
+            }
+
+            originalJobs = jobs;
+            renderJobs(jobs);
+          } catch (error) {
+            console.error("Lỗi khi tải jobs:", error);
+            tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center p-4 text-red-500">
+          ❌ ${error.message || "Lỗi khi tải danh sách jobs"}
+        </td>
+      </tr>
+    `;
+          }
+        }
+
+        // Gắn sự kiện tìm kiếm
+        searchButton.addEventListener("click", searchJobs);
+        resetSearch.addEventListener("click", resetSearchJobs);
+
+        // Tìm kiếm khi nhấn Enter
+        searchKeyword.addEventListener("keyup", (e) => {
+          if (e.key === "Enter") {
+            searchJobs();
+          }
+        });
+
+        // Tải danh sách jobs ban đầu
+        await loadJobs();
+      });
+
+      function showJobDetails(jobId) {
+        const modal = document.getElementById("jobDetailsModal");
+        const jobInfo = document.getElementById("jobInfo");
+        const appTable = document.getElementById("applicationTableBody");
+        const appTableWrapper = document.getElementById(
+          "applicationTableWrapper"
+        );
+        const role = localStorage.getItem("role");
+        if (role === "ROLE_APPLICANT") {
+          appTableWrapper.style.display = "none";
+        } else {
+          appTableWrapper.style.display = "block";
+        }
+
+        fetch(`/api/jobs/${jobId}/details`, {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Không lấy được dữ liệu chi tiết.");
+            return res.json();
+          })
+          .then((data) => {
+            jobInfo.innerHTML = `
+        <h2 class="text-xl font-bold text-blue-600 mb-2">${data.title}</h2>
+        <p><strong>Địa điểm:</strong> ${data.location}</p>
+        <p><strong>Lương:</strong> ${data.salary.toLocaleString()} VND</p>
+        <p><strong>Mô tả:</strong> ${data.description}</p>
+        <p><strong>Số đơn apply:</strong> ${data.totalApplications}</p>
+        ${
+          data.imageUrl
+            ? `<img src="${data.imageUrl}" alt="Ảnh Job" class="w-32 h-32 object-cover mt-2 rounded">`
+            : ""
+        }
+      `;
+
+            appTable.innerHTML = "";
+            if (data.applications.length === 0) {
+              appTable.innerHTML = `<tr><td colspan="4" class="text-center p-2 text-gray-500">Không có đơn apply nào.</td></tr>`;
+            } else {
+              data.applications.forEach((app) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+            <td class="p-2 border">${app.id}</td>
+            <td class="p-2 border">${app.applicantName}</td>
+            <td class="p-2 border">${app.coverLetter}</td>
+            <td class="p-2 border">${app.status}</td>
+          `;
+                appTable.appendChild(row);
+              });
+            }
+
+            modal.style.display = "block";
+          })
+          .catch((err) => {
+            alert("❌ " + err.message);
+          });
+      }
+
+      function closeJobDetails() {
+        document.getElementById("jobDetailsModal").style.display = "none";
+      }
+    </script>
+  </body>
+</html>

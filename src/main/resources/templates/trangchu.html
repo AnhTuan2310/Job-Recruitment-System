@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang chủ</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+        background-color: #f5f6fa;
+      }
+
+      .container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+
+      .sidebar {
+        width: 300px;
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 20px 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        height: 1000px;
+        box-sizing: border-box;
+      }
+
+      .profile {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .profile img {
+        width: 300px;
+        height: 100px;
+        border-radius: 0%;
+        margin-bottom: 10px;
+      }
+
+      .profile h2 {
+        margin: 10px 0 5px;
+        font-size: 20px;
+      }
+
+      .profile p {
+        font-size: 14px;
+        color: #bdc3c7;
+      }
+
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+        width: 100%;
+        margin: 0;
+      }
+
+      nav ul li {
+        margin: 15px 0;
+      }
+
+      nav ul li a {
+        color: #ecf0f1;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.3s;
+      }
+
+      nav ul li a i {
+        margin-right: 10px;
+        font-size: 20px;
+      }
+
+      nav ul li a:hover {
+        transform: translateX(5px);
+      }
+
+      nav ul li a.add-user:hover {
+        background-color: #3498db;
+      }
+
+      nav ul li a.list-user:hover {
+        background-color: #1abc9c;
+      }
+
+      nav ul li a.add-job:hover {
+        background-color: #9b59b6;
+      }
+
+      nav ul li a.list-job:hover {
+        background-color: #e67e22;
+      }
+
+      nav ul li a.add-application:hover {
+        background-color: #e74c3c;
+      }
+
+      nav ul li a.list-application:hover {
+        background-color: #f1c40f;
+      }
+
+      .main-content {
+        flex-grow: 1;
+        padding: 20px 30px;
+        background-color: #ecf0f1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      header h1 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 24px;
+      }
+
+      header button {
+        padding: 10px 20px;
+        background-color: #e74c3c;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      header button:hover {
+        background-color: #c0392b;
+      }
+
+      .dashboard {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      .card {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        flex-grow: 1;
+        min-width: 300px;
+        margin-bottom: 20px;
+      }
+
+      .card h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        font-size: 20px;
+      }
+
+      .card p {
+        margin: 10px 0;
+        color: #34495e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="sidebar" style="height: 1050px">
+        <div class="profile">
+          <img
+            src="/image/spring_boot-logo_brandlogos.net_dxzea.png"
+            alt="Profile Picture"
+          />
+          <h2>
+            <a id="profile-link" style="color: #0ea5e9; cursor: pointer"
+              >User</a
+            >
+          </h2>
+
+          <p>Chào mừng bạn trở lại</p>
+        </div>
+        <nav>
+          <ul>
+            <li class="admin-only">
+              <a href="addadmin" class="add-user"
+                ><i class="fas fa-user-plus"></i> Thêm Admin Account</a
+              >
+            </li>
+            <li class="admin-only">
+              <a href="userlist" class="list-user"
+                ><i class="fas fa-users"></i> Danh sách User</a
+              >
+            </li>
+            <li class="admin-com-only">
+              <a href="addjob" class="add-job"
+                ><i class="fas fa-briefcase"></i> Thêm Job</a
+              >
+            </li>
+            <li class="admin-applicant">
+              <a href="jobslist" class="list-job">
+                <i class="fas fa-list"></i> Danh sách Job
+              </a>
+            </li>
+
+            <li class="admin-com-only">
+              <a href="myjobslist" class="list-job"
+                ><i class="fas fa-list"></i> Danh sách Job đã tạo</a
+              >
+            </li>
+            <li class="applicant">
+              <a href="apply" class="add-application"
+                ><i class="fas fa-file-alt"></i> Thêm Đơn ứng tuyển</a
+              >
+            </li>
+            <li class="admin-com-only">
+              <a href="applylist" class="list-application"
+                ><i class="fas fa-folder-open"></i> Danh sách ứng tuyển</a
+              >
+            </li>
+            <li class="applicant">
+              <a href="myapplylist" class="list-application"
+                ><i class="fas fa-folder-open"></i> Danh sách đã ứng tuyển</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div class="main-content">
+        <header>
+          <h1>Quản lý tuyển dụng</h1>
+          <button>
+            <a
+              href="#"
+              style="color: white; text-decoration: none"
+              onclick="logout()"
+              >Đăng xuất</a
+            >
+          </button>
+        </header>
+        <section class="dashboard">
+          <div class="card">
+            <h3>Thông tin tổng quan</h3>
+            <p>Số lượng người dùng: 100</p>
+            <p>Số lượng công việc: 25</p>
+            <p>Số lượng đơn ứng tuyển: 150</p>
+            <p>Đơn ứng tuyển đang xử lý: 30</p>
+          </div>
+          <div class="card">
+            <h3>Thống kê tuyển dụng</h3>
+            <p>Công việc đăng tháng này: 5</p>
+            <p>Đơn ứng tuyển tháng này: 40</p>
+            <p>Tỷ lệ ứng tuyển thành công: 20%</p>
+          </div>
+          <div class="card">
+            <h3>Thông báo</h3>
+            <p>- Đợt tuyển dụng mới sẽ bắt đầu vào ngày 20/06.</p>
+            <p>- Kiểm tra đơn ứng tuyển trước ngày 25/06.</p>
+            <p>- Cập nhật thông tin công việc mới trước ngày 30/06.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("token");
+        console.log("📦 Dữ liệu trong localStorage:");
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          const value = localStorage.getItem(key);
+          console.log(`🧩 ${key}: ${value}`);
+        }
+        if (!token) {
+          alert("⛔ Bạn chưa đăng nhập!");
+          window.location.href = "/login";
+          return;
+        }
+
+        const role = localStorage.getItem("role");
+        console.log("ROLE:" + role);
+
+        // Phân quyền hiển thị menu
+        // Ẩn tất cả trước
+        document
+          .querySelectorAll(
+            ".admin-only, .admin-com-only, .applicant, .admin-applicant, .all"
+          )
+          .forEach((e) => (e.style.display = "none"));
+
+        if (role === "ROLE_ADMIN") {
+          document
+            .querySelectorAll(".admin-only, .admin-com-only, .admin-applicant")
+            .forEach((e) => (e.style.display = "list-item"));
+        } else if (role === "ROLE_COMPANY") {
+          document
+            .querySelectorAll(".admin-com-only")
+            .forEach((e) => (e.style.display = "list-item"));
+        } else if (role === "ROLE_APPLICANT") {
+          document
+            .querySelectorAll(".applicant, .admin-applicant")
+            .forEach((e) => (e.style.display = "list-item"));
+        }
+
+        try {
+          const res = await fetch(`/api/users/me`, {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          });
+          if (!res.ok) throw new Error("Lỗi lấy thông tin user");
+
+          const user = await res.json();
+
+          const profileLink = document.getElementById("profile-link");
+          profileLink.textContent = user.full_name;
+          profileLink.addEventListener("click", () => {
+            window.location.href = "/profile";
+          });
+        } catch (e) {
+          console.error("❌ Không thể lấy thông tin user:", e);
+        }
+      });
+
+      function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("id");
+        localStorage.removeItem("selected_job_id");
+        alert("Đã đăng xuất!");
+        window.location.href = "/login";
+      }
+    </script>
+  </body>
+</html>
