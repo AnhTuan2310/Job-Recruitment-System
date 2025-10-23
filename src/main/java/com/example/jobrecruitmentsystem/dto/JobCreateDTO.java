@@ -11,5 +11,6 @@ public class JobCreateDTO {
     private double salary;
     private JobStatus status;
     private String imageUrl;
+
 }
 

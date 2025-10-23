@@ -126,7 +126,7 @@
           </div>
           <div class="form-group">
             <span class="forgot-password">
-              <button type="button" onclick="window.location.href='/reg'">
+              <button type="button" onclick="window.location.href='/register'">
                 Đăng ký
               </button>
             </span>
@@ -183,7 +183,17 @@
                 localStorage.setItem("id", userId);
               }
               alert("Đăng nhập thành công!");
-              window.location.href = "/trangchu"; // hoặc redirect FE khác
+
+              // Check if there's a pending job application
+              const pendingJobId = localStorage.getItem(
+                "pendingJobApplication"
+              );
+              if (pendingJobId) {
+                localStorage.removeItem("pendingJobApplication");
+                window.location.href = `/apply?jobId=${pendingJobId}`;
+              } else {
+                window.location.href = "/trangchu"; // hoặc redirect FE khác
+              }
             } else {
               if (response.status === 401 || response.status === 403) {
                 alert("❌ Lỗi hệ thống. Vui lòng thử lại sau.");

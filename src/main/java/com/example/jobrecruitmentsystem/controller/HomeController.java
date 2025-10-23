@@ -5,33 +5,78 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {
-
-    @GetMapping("/reg")
-    public String showRegisterPage() {
-        return "register";
+    @GetMapping("/")
+    public String home() {
+        return "home";
     }
+
+    @GetMapping("/home")
+    public String homePage() {
+        return "home";
+    }
+
     @GetMapping("/login")
-    public String showLoginPage() {return "login";}
-    @GetMapping("/dashboard")
-    public String showDashBoardPage() {return "dashboard";}
+    public String loginPage() {
+        return "login";
+    }
+
+    @GetMapping("/register")
+    public String registerPage() {
+        return "register"; // hiển thị file register.html trong templates
+    }
+
     @GetMapping("/trangchu")
-    public String showTrangchuPage() {return "trangchu";}
+    public String trangchu() {
+        return "trangchu";
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboard() {
+        return "dashboard";
+    }
+
     @GetMapping("/addjob")
-    public String showAddJobPage() {return "addjob";}
-    @GetMapping("/apply")
-    public String showApplyPage() {return "apply";}
-    @GetMapping("/addadmin")
-    public String showAddAdminPage() {return "addadmin";}
+    public String addjob() {
+        return "addjob";
+    }
+
     @GetMapping("/jobslist")
-    public String showJobslistPage() {return "jobslist";}
-    @GetMapping("/applylist")
-    public String showApplyListPage() {return "applylist";}
-    @GetMapping("/userlist")
-    public String showUserListPage() {return "userlist";}
-    @GetMapping("/profile")
-    public String showProfilePage() {return "profile";}
+    public String jobslist() {
+        return "jobslist";
+    }
+
     @GetMapping("/myjobslist")
-    public String showMyJobsListPage() {return "myjobslist";}
+    public String myjobslist() {
+        return "myjobslist";
+    }
+
+    @GetMapping("/apply")
+    public String apply() {
+        return "apply";
+    }
+
     @GetMapping("/myapplylist")
-    public String showMyApplyListPage() {return "myapplylist";}
+    public String myapplylist() {
+        return "myapplylist";
+    }
+
+    @GetMapping("/applylist")
+    public String applylist() {
+        return "applylist";
+    }
+
+    @GetMapping("/userlist")
+    public String userlist() {
+        return "userlist";
+    }
+
+    @GetMapping("/profile")
+    public String profile() {
+        return "profile";
+    }
+
+    @GetMapping("/addadmin")
+    public String addadmin() {
+        return "addadmin";
+    }
 }

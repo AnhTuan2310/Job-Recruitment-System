@@ -54,6 +54,9 @@
             <th class="p-2 border text-gray-700">Trạng Thái</th>
             <th class="p-2 border text-gray-700">Tạo Bởi</th>
             <th class="p-2 border text-gray-700">Job Title</th>
+            <<<<<<< HEAD =======
+            <th class="p-2 border text-gray-700">CV(pdf)</th>
+            >>>>>>> quan
             <th class="p-2 border text-gray-700">Thao Tác</th>
           </tr>
         </thead>
@@ -146,22 +149,28 @@
               : "text-red-600";
 
           row.innerHTML = `
-      <td class="p-2 border">${app.id}</td>
-      <td class="p-2 border">${app.coverLetter}</td>
-      <td class="p-2 border ${statusColor}">${app.status}</td>
-      <td class="p-2 border">${
-        app.applicant.full_name || app.applicant.username
-      }</td>
-      <td class="p-2 border">${app.job.title}</td>
-      <td class="p-2 border text-center">
-        <button onclick="editApplication(${app.id}, '${app.coverLetter}', '${
+  <td class="p-2 border">${app.id}</td>
+  <td class="p-2 border">${app.coverLetter}</td>
+  <td class="p-2 border ${statusColor}">${app.status}</td>
+  <td class="p-2 border">${app.applicantName}</td>
+  <td class="p-2 border">${app.jobTitle}</td>
+  <td class="p-2 border text-center">
+    ${
+      app.cvUrl
+        ? `<a href="${app.cvUrl}" target="_blank" class="text-blue-600 hover:underline">Xem CV</a>`
+        : `<span class="text-gray-400 italic">Chưa có CV</span>`
+    }
+  </td>
+  <td class="p-2 border text-center">
+    <button onclick="editApplication(${app.id}, '${app.coverLetter}', '${
             app.status
-          }')" 
-          class="bg-yellow-500 text-white p-1 rounded text-xs mr-1">Sửa</button>
-        <button onclick="deleteApplication(this, ${app.id})" 
-          class="bg-red-500 text-white p-1 rounded text-xs">Xóa</button>
-      </td>
-  `;
+          }')"
+      class="bg-yellow-500 text-white p-1 rounded text-xs mr-1">Sửa</button>
+    <button onclick="deleteApplication(this, ${app.id})"
+      class="bg-red-500 text-white p-1 rounded text-xs">Xóa</button>
+  </td>
+`;
+
           tbody.appendChild(row);
         });
       }

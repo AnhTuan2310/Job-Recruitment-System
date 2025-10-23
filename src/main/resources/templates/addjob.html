@@ -216,10 +216,12 @@
         alert("⛔ Bạn không có quyền truy cập trang này!");
         window.location.href = "/trangchu";
       }
+
+      //xử lý gửi form công việc
       document
         .getElementById("jobForm")
         .addEventListener("submit", async function (e) {
-          e.preventDefault();
+          e.preventDefault(); // Ngăn form gửi mặc định
 
           const title = document.getElementById("title").value;
           const location = document.getElementById("location").value;

@@ -66,11 +66,11 @@ public class SecurityConfig {
                                 "/api/applications",
                                 "/api/applications/my","/api/jobs/my",
                                 "/api/jobs/**",
-                                "/reg","/error",
+                                "/register","/error",
                                 "/favicon.ico",
                                 "/login","/dashboard","/trangchu","/myjobslist","/myapplylist",
                                 "/addjob","/apply","/addadmin","/jobslist"
-                        ,"/applylist","/userlist","/profile","/uploads/**","/image/**")
+                        ,"/applylist","/userlist","/profile","/uploads/**","/image/**","/cv-management","/","/home")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

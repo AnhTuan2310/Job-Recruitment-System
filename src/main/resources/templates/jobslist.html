@@ -737,9 +737,8 @@
         const modal = document.getElementById("jobDetailsModal");
         const jobInfo = document.getElementById("jobInfo");
         const appTable = document.getElementById("applicationTableBody");
-        const appTableWrapper = document.getElementById(
-          "applicationTableWrapper"
-        );
+
+        const appTableWrapper = document.getElementById("applicationTableWrapper");
         const role = localStorage.getItem("role");
         if (role === "ROLE_APPLICANT") {
           appTableWrapper.style.display = "none";

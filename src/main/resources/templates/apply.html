@@ -21,12 +21,7 @@
         right: 0;
         bottom: 0;
         z-index: 0;
-        background: linear-gradient(
-          135deg,
-          #e0e7ff 0%,
-          #f0fdfa 50%,
-          #fef6e4 100%
-        );
+        background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 50%, #fef6e4 100%);
         width: 100vw;
         height: 100vh;
       }
@@ -171,7 +166,6 @@
         color: #333;
         font-size: 0.99rem;
       }
-
       @media (max-width: 700px) {
         .container {
           padding: 16px 4px;
@@ -180,6 +174,7 @@
           flex-direction: column;
           gap: 10px;
         }
+
         th,
         td {
           padding: 8px 4px;
@@ -195,7 +190,13 @@
     <div class="background-gradient"></div>
     <div class="container">
       <h1>Ứng Tuyển</h1>
-      <form class="form" id="apply-form">
+
+      <form
+        class="form"
+        id="apply-form"
+        method="post"
+        enctype="multipart/form-data"
+      >
         <div class="input-group">
           <label for="cover_letter">📝 Mô tả</label>
           <textarea
@@ -204,6 +205,7 @@
             placeholder="Mô tả về bản thân hoặc vị trí ứng tuyển"
           ></textarea>
         </div>
+
         <div class="input-group">
           <label for="status">⏳ Trạng thái</label>
           <select id="status">
@@ -214,9 +216,20 @@
           <label for="job_id">🏢 Job ID-Title</label>
           <input type="text" id="job_id" placeholder="Nhập Job ID" />
         </div>
+
         <div class="input-group">
-          <label for="image">🖼️ Hình ảnh</label>
-          <input type="file" id="image" />
+          <label for="cvFile">📄 Nộp CV (file PDF)</label>
+          <input 
+            type="file" 
+            id="cvFile" 
+            name="cvFile" 
+            accept="application/pdf,.pdf" 
+            required
+            style="padding: 11px 13px; border: 1.5px solid #e0e0e0; border-radius: 9px; font-size: 1rem; background: #f7faff; transition: border 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(60, 60, 120, 0.04); width: 100%; box-sizing: border-box;"
+          />
+          <small style="color: #666; font-size: 0.9rem; margin-top: 4px; display: block;">
+            Chỉ chấp nhận file PDF (tối đa 5MB)
+          </small>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn save">💾 Lưu</button>
@@ -238,17 +251,39 @@
         const tbody = document.getElementById("applications-table-body");
 
         // 🚫 Phân quyền: chỉ cho APPLICANT
+
         if (role !== "ROLE_APPLICANT") {
           alert("⛔ Bạn không có quyền truy cập trang này!");
           window.location.href = "/trangchu";
           return;
         }
 
-        // ✅ Gán jobId vào input nếu có trong localStorage
+
+        // Validate token expiration on page load
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          if (payload.exp && payload.exp < currentTime) {
+            alert("⚠️ Token đã hết hạn. Vui lòng đăng nhập lại.");
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            window.location.href = "/login";
+            return;
+          }
+        } catch (error) {
+          alert("⚠️ Token không hợp lệ. Vui lòng đăng nhập lại.");
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          window.location.href = "/login";
+          return;
+        }
+
+        // Lấy Job ID & Title
         const jobId = localStorage.getItem("selected_job_id");
         if (jobId && jobIdInput) {
           try {
             const response = await fetch(`/api/jobs/${jobId}`, {
+
               headers: {
                 Authorization: "Bearer " + token,
               },
@@ -276,58 +311,79 @@
               return;
             }
 
-            // ✅ Lấy user ID từ token (applicant_id)
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            const applicantId = payload.id || payload.user_id || payload.sub;
-
-            if (!applicantId) {
-              alert("❌ Không tìm thấy ID người dùng trong token.");
+            // Validate token expiration
+            try {
+              const payload = JSON.parse(atob(token.split(".")[1]));
+              const currentTime = Math.floor(Date.now() / 1000);
+              if (payload.exp && payload.exp < currentTime) {
+                alert("⚠️ Token đã hết hạn. Vui lòng đăng nhập lại.");
+                localStorage.removeItem("token");
+                localStorage.removeItem("role");
+                window.location.href = "/login";
+                return;
+              }
+              var applicantId = payload.id || payload.user_id || payload.sub;
+            } catch (error) {
+              alert("⚠️ Token không hợp lệ. Vui lòng đăng nhập lại.");
+              localStorage.removeItem("token");
+              localStorage.removeItem("role");
+              window.location.href = "/login";
               return;
             }
 
             const coverLetter = document.getElementById("cover_letter").value;
             const status = document.getElementById("status").value;
-            const jobId = parseInt(jobIdInput.value.split(" - ")[0]);
+            
+            // Lấy job ID từ localStorage thay vì parse từ input
+            const jobId = localStorage.getItem("selected_job_id");
+            if (!jobId) {
+              alert("⚠️ Không tìm thấy Job ID. Vui lòng chọn job từ trang chủ.");
+              return;
+            }
+            
+            const cvFile = document.getElementById("cvFile").files[0];
 
-            const applicationData = {
-              coverLetter,
-              status,
-              applicant_id: applicantId,
-              jobId,
-            };
+            if (!cvFile) {
+              alert("⚠️ Vui lòng chọn file PDF CV để nộp.");
+              return;
+            }
+
+            // Validate file type
+            if (cvFile.type !== "application/pdf") {
+              alert("⚠️ Vui lòng chỉ chọn file PDF.");
+              return;
+            }
+
+            // Validate file size (5MB max)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (cvFile.size > maxSize) {
+              alert("⚠️ File PDF quá lớn. Vui lòng chọn file nhỏ hơn 5MB.");
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append("coverLetter", coverLetter);
+            formData.append("status", status);
+            formData.append("applicant_id", applicantId);
+            formData.append("jobId", parseInt(jobId));
+            formData.append("cvFile", cvFile);
 
             try {
-              const response = await fetch("/api/applications", {
+              const response = await fetch("/api/applications/upload", {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: "Bearer " + token,
-                },
-                body: JSON.stringify(applicationData),
+                headers: { Authorization: "Bearer " + token },
+                body: formData,
               });
-
               if (!response.ok) {
-                const err = await response.text();
-                throw new Error(err);
+                const errorText = await response.text();
+                throw new Error(errorText || "Có lỗi xảy ra khi nộp đơn");
               }
-
-              const data = await response.json();
-              alert("✅ Nộp đơn thành công!");
-              console.log("Kết quả:", data);
-
-              // ✅ Thêm đơn mới vào bảng bên dưới ngay lập tức
-              const newRow = document.createElement("tr");
-              newRow.innerHTML = `
-          <td>${tbody.children.length + 1}</td>
-          <td>[NULL]</td>
-          <td>${data.coverLetter ?? "Không có"}</td>
-          <td>${data.status}</td>
-          <td>${data.applicant?.username ?? "Ẩn"}</td>
-          <td>${data.job?.id ?? "?"}</td>
-        `;
-              tbody.appendChild(newRow);
+              alert("✅ Nộp đơn và CV thành công!");
+              // Redirect về trang chủ sau khi nộp đơn thành công
+              window.location.href = "/trangchu";
             } catch (error) {
               console.error("❌ Lỗi nộp đơn:", error);
+              alert("❌ Gửi CV thất bại: " + error.message);
             }
           });
       });

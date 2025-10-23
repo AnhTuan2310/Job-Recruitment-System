@@ -37,10 +37,25 @@ public class ApplicationService {
         return applicationRepository.save(app);
     }
 
+
+    // Lấy Job theo ID
+    public Job getJobById(Long jobId) {
+        return jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+    }
+
+    // Lấy User theo username
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
     public List<Application> getApplicationsByJobId(Long jobId) {
         return applicationRepository.findByJobId(jobId);
     }
 
+    public Application save(Application app) {
+        return applicationRepository.save(app);
+    }
     public List<Application> getApplicationsByApplicant(String applicantUsername) {
         User applicant = userRepository.findByUsername(applicantUsername)
                 .orElseThrow(() -> new RuntimeException("Applicant not found"));

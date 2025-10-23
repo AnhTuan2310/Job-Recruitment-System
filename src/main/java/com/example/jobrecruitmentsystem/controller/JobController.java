@@ -50,13 +50,17 @@ public class JobController {
 
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('COMPANY', 'ADMIN','APPLICANT')")
     public ResponseEntity<List<Job>> getAllJobs() {
-
+        // Allow anonymous access to view all jobs
         List<Job> jobs = jobService.getAllJobs();
         return ResponseEntity.ok(jobs);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Job> getJobById(@PathVariable Long id) {
+        Job job = jobService.getJobById(id);
+        return ResponseEntity.ok(job);
+    }
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_COMPANY', 'ROLE_ADMIN')")
     public ResponseEntity<Job> updateJob(@PathVariable Long id,

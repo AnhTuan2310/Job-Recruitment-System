@@ -24,6 +24,9 @@ public class Application {
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status = ApplicationStatus.PENDING; // Thay Status bằng ApplicationStatus
 
+
+    @Column(name = "cv_file_name")
+    private String cvFileName;
     private LocalDateTime createdAt = LocalDateTime.now();
 
 }
